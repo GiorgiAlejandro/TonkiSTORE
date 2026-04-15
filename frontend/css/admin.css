@@ -1,0 +1,188 @@
+/* ─── Admin page styles ───────────────────────────────────────── */
+
+.admin-page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 3rem clamp(1.5rem, 4vw, 3rem) 6rem;
+}
+
+.admin-page__heading {
+    margin-bottom: 2.5rem;
+}
+
+.admin-page__label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+}
+
+.admin-page__title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: 0.03em;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+/* ── Form fields — no card, sits on bg-base ──────────────────── */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.4rem;
+}
+
+.form-group label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.form-group input,
+.form-group textarea {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-bright);
+    border-radius: 0;
+    padding: 0.6rem;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color var(--transition);
+    resize: none;
+    width: 100%;
+}
+
+.form-group input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.form-group input[type="number"]::-webkit-inner-spin-button,
+.form-group input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.form-group textarea {
+    min-height: 2.4rem;
+    line-height: 1.35;
+    overflow: hidden;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-bottom-color: var(--accent);
+}
+
+/* two-column row for price fields */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+/* image upload */
+.upload-area {
+    position: relative;
+    border-bottom: 1px dashed var(--border-bright);
+    padding: 1.2rem 0;
+    cursor: pointer;
+    transition: border-color var(--transition);
+}
+
+.upload-area:hover {
+    border-bottom-color: var(--accent);
+}
+
+.upload-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+.upload-area__label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.upload-area__label span {
+    color: var(--accent);
+}
+
+.image-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.image-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid var(--border-bright);
+}
+
+/* feedback messages */
+.form-msg {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 0.6rem 0;
+    display: none;
+}
+
+.form-msg.error {
+    color: #f87171;
+    display: block;
+}
+.form-msg.success {
+    color: #4ade80;
+    display: block;
+}
+
+/* submit button — full width, accent */
+.btn-submit {
+    width: 100%;
+    padding: 0.85rem;
+    background: var(--accent);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    transition:
+        opacity var(--transition),
+        transform var(--transition);
+}
+
+.btn-submit:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 480px) {
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}

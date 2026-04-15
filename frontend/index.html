@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>TonkiSTORE — Videojuegos</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="css/styles.css" />
+    </head>
+
+    <body>
+        <!-- ─── Header ─────────────────────────────────────────────────────── -->
+        <header class="header">
+            <div class="header__inner">
+                <div class="logo">
+                    <div class="logo__icon"></div>
+                    <span class="logo__text">TONKI<span>STORE</span></span>
+                </div>
+
+                <div class="search-wrapper">
+                    <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                    <input class="search-input" id="searchInput" type="text" placeholder="Buscar juegos, géneros, plataformas..." autocomplete="off" />
+                </div>
+
+                <button class="btn-filter" id="filterBtn" type="button">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="4" y1="6" x2="16" y2="6" />
+                        <line x1="8" y1="12" x2="20" y2="12" />
+                        <line x1="4" y1="18" x2="12" y2="18" />
+                    </svg>
+                    Filtros
+                </button>
+
+                <nav class="header__nav">
+                    <a href="admin.html" class="btn-admin">Panel admin</a>
+                    <button class="btn-auth btn-auth--outline" type="button">Crear cuenta</button>
+                    <button class="btn-auth btn-auth--filled" type="button">Iniciar sesión</button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- ─── Home view (hidden when detail is open) ──────────────────────── -->
+        <div id="homeView">
+            <!-- Hero banner -->
+            <section class="hero">
+                <div class="hero__inner">
+                    <div>
+                        <p class="hero__label">// Colección 2026</p>
+                        <h1 class="hero__title">
+                            Los mejores juegos
+                            <span>del año, acá.</span>
+                        </h1>
+                        <p class="hero__sub">Descuentos exclusivos en los títulos más esperados. Entrega digital inmediata.</p>
+                        <a class="hero__cta" href="#">
+                            Ver ofertas
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                                <polyline points="12 5 19 12 12 19" />
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="hero__badge">
+                        <span class="hero__badge-number">42</span>
+                        <span class="hero__badge-label">Juegos en oferta</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Product grid -->
+            <main class="section">
+                <div class="section__header">
+                    <h2 class="section__title">Catálogo</h2>
+                    <span class="section__count" id="productCount"></span>
+                </div>
+                <div class="product-grid" id="productGrid"></div>
+                <div class="pagination" id="pagination"></div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="footer__inner">
+                    <span class="footer__copy">© 2026 TonkiSTORE. Todos los derechos reservados.</span>
+                    <nav class="footer__links">
+                        <a href="#">Términos</a>
+                        <a href="#">Privacidad</a>
+                        <a href="#">Soporte</a>
+                        <a href="#">Contacto</a>
+                    </nav>
+                </div>
+            </footer>
+        </div>
+        <!-- /#homeView -->
+
+        <!-- ─── Detail view: full-screen, hidden by default ─────────────────── -->
+        <div id="detailView" class="detail-view">
+            <div class="detail-page-body" id="detailContent"></div>
+        </div>
+
+        <!-- ─── JS modules (orden importa: data → render → router → ui → main) -->
+        <script src="js/data.js"></script>
+        <script src="js/render.js"></script>
+        <script src="js/router.js"></script>
+        <script src="js/ui.js"></script>
+        <script src="js/main.js"></script>
+    </body>
+</html>

@@ -1,51 +1,96 @@
 // router.js
-// Handles navigation between the home view and the full-screen detail view.
-// Instead of a modal overlay, swaps visibility between #homeView and #detailView.
-// Depends on: data.js (getProductById), render.js (buildDetailHTML)
+// Handles navigation between the home view and the detail view.
 
 const Router = (() => {
-    // ── Private state ───────────────────────────────────────────────────────
     let _homeView = null;
     let _detailView = null;
     let _detailContent = null;
-
-    // ── Private helpers ─────────────────────────────────────────────────────
+    let _lastScrollY = 0;
+    let _currentProductId = null;
 
     function _open(product) {
+        if (!_homeView || !_detailView || !_detailContent) return;
+
+        _lastScrollY = window.scrollY || window.pageYOffset || 0;
+        _currentProductId = product.id;
         _detailContent.innerHTML = buildDetailHTML(product);
 
-        // swap views: hide home, show detail
         _homeView.style.display = "none";
         _detailView.style.display = "block";
 
-        // scroll to top of the page so the detail header is visible
-        window.scrollTo({ top: 0, behavior: "instant" });
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }
 
     function _close() {
-        // swap back: show home, hide detail
+        if (!_homeView || !_detailView || !_detailContent) return;
+
         _detailView.style.display = "none";
         _homeView.style.display = "block";
-
         _detailContent.innerHTML = "";
+        _currentProductId = null;
+
+        window.scrollTo({ top: _lastScrollY, left: 0, behavior: "auto" });
     }
 
-    // ── Public API ──────────────────────────────────────────────────────────
+    async function _refreshOpenDetail() {
+        if (!_currentProductId || !_detailView || _detailView.style.display !== "block") return;
+
+        try {
+            const product = await getProductById(_currentProductId);
+            if (!product) return;
+            _detailContent.innerHTML = buildDetailHTML(product);
+        } catch {
+            // Keep the current detail state if the refresh fails.
+        }
+    }
 
     function init() {
         _homeView = document.getElementById("homeView");
         _detailView = document.getElementById("detailView");
         _detailContent = document.getElementById("detailContent");
 
-        _detailContent.addEventListener("click", (e) => {
-            if (e.target.closest("[data-action='back-to-grid']")) {
+        if (!_homeView || !_detailView || !_detailContent) return;
+
+        // Make logo clickable to return to home
+        const logo = document.querySelector(".logo");
+        if (logo) {
+            logo.addEventListener("click", () => {
+                if (_detailView.style.display === "block") {
+                    _close();
+                }
+            });
+            logo.style.cursor = "pointer";
+        }
+
+        _detailContent.addEventListener("click", (event) => {
+            if (event.target.closest("[data-action='back-to-grid']")) {
+                _close();
+                return;
+            }
+
+            const favoriteBtn = event.target.closest("[data-action='toggle-favorite']");
+            if (favoriteBtn) {
+                event.preventDefault();
+                event.stopPropagation();
+                const productId = Number(favoriteBtn.dataset.productId);
+                if (Number.isInteger(productId)) {
+                    window.Favorites?.toggleFavorite?.(productId);
+                }
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && _detailView.style.display === "block") {
                 _close();
             }
         });
 
-        // Escape key also goes back
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" && _detailView.style.display === "block") _close();
+        window.addEventListener("auth:changed", () => {
+            _refreshOpenDetail();
+        });
+
+        window.addEventListener("favorites:changed", () => {
+            _refreshOpenDetail();
         });
     }
 
@@ -54,7 +99,7 @@ const Router = (() => {
             const product = await getProductById(productId);
             if (!product) return;
             _open(product);
-        } catch (error) {
+        } catch {
             alert("No se pudo cargar el detalle del juego.");
         }
     }

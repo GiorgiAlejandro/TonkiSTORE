@@ -42,6 +42,18 @@ class GamesDB:
         game = dict(row)
         game["tags"] = self._get_tags_for_game(cursor, game["app_id"])
         game["image_url"] = STEAM_IMAGE_URL.format(app_id=game["app_id"])
+        # Attach genre object when possible
+        try:
+            genre_id = game.get("genre_id")
+            if genre_id:
+                cursor.execute("SELECT id, name, icon FROM genres WHERE id = ?", (genre_id,))
+                g = cursor.fetchone()
+                game["genre"] = dict(g) if g else None
+            else:
+                # fallback to existing genre text
+                game["genre"] = {"id": None, "name": game.get("genre") or ""}
+        except Exception:
+            game["genre"] = {"id": None, "name": game.get("genre") or ""}
         return game
 
     def add_game(
@@ -49,7 +61,7 @@ class GamesDB:
         app_id: int,
         name: str,
         release_date: str | None,
-        genre: str | None,
+        genre_id: int | None,
         price_usd: float,
         discount_pct: int,
         tags: list[str] | None = None,
@@ -58,9 +70,9 @@ class GamesDB:
             conn.execute("PRAGMA foreign_keys = ON")
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO games (app_id, name, release_date, genre, price_usd, discount_pct)
+                INSERT INTO games (app_id, name, release_date, genre_id, price_usd, discount_pct)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (app_id, name, release_date, genre, price_usd, discount_pct))
+            """, (app_id, name, release_date, genre_id, price_usd, discount_pct))
 
             if tags:
                 self._insert_tags(cursor, app_id, tags)
@@ -83,7 +95,13 @@ class GamesDB:
     def get_by_genre(self, genre: str) -> list[dict[str, Any]]:
         with self._connect() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM games WHERE genre = ? ORDER BY RANDOM()", (genre,))
+            # genre can be either an id (int) or a text name
+            try:
+                gid = int(genre)
+                cursor.execute("SELECT * FROM games WHERE genre_id = ? ORDER BY RANDOM()", (gid,))
+            except Exception:
+                cursor.execute("SELECT * FROM games WHERE genre = ? ORDER BY RANDOM()", (genre,))
+
             return [self._row_to_dict(cursor, row) for row in cursor.fetchall()]
 
     def get_by_tag(self, tag: str) -> list[dict[str, Any]]:
@@ -164,3 +182,10 @@ class GamesDB:
             cursor.execute("DELETE FROM game_tags WHERE app_id = ?", (app_id,))
             cursor.execute("DELETE FROM games WHERE app_id = ?", (app_id,))
             return cursor.rowcount > 0
+
+    def get_all_tags(self) -> list[dict[str, Any]]:
+        """Obtiene todos los tags de la tabla tags."""
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT tag_id as id, name FROM tags ORDER BY name")
+            return [dict(row) for row in cursor.fetchall()]

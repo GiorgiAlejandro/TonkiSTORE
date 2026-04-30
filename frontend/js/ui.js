@@ -1,51 +1,124 @@
 // ui.js
-// Handles all direct DOM manipulation: rendering the product grid,
-// updating the product count, pagination, and wiring up the search input.
-// Depends on: data.js (fetchGames, searchGames), render.js (buildCardHTML, buildNoResultsHTML),
-//             router.js (Router.navigateTo)
+// Handles direct DOM manipulation for the product grid and search.
 
 const UI = (() => {
-    const PAGE_SIZE = 10; // sprint requirement: max 10 products per page
+    const PAGE_SIZE = 10;
     const SEARCH_DEBOUNCE_MS = 250;
 
-    // ── Private state ─────────────────────────────────────────────────────────
     let _grid = null;
     let _countEl = null;
     let _searchInput = null;
     let _pagination = null;
+    let _favoritesBtn = null;
+    let _sectionTitle = null;
 
-    let _currentList = []; // the active filtered list
+    let _sourceList = [];
+    let _currentList = [];
     let _currentPage = 1;
     let _searchToken = 0;
     let _searchDebounceTimer = null;
+    let _favoritesOnly = false;
+    let _hasLoadedProducts = false;
 
-    // ── Private helpers ──────────────────────────────────────────────────────
-
-    function _updateCount(n) {
-        _countEl.textContent = n > 0 ? `${n} juego${n !== 1 ? "s" : ""}` : "";
+    function _updateCount(count) {
+        _countEl.textContent = count > 0 ? `${count} juego${count !== 1 ? "s" : ""}` : "";
     }
 
     function _showGridError(message) {
         _grid.innerHTML = `
-                <div class="no-results">
-                    <p>${message}</p>
-                </div>
-            `;
+            <div class="no-results">
+                <p>${message}</p>
+            </div>
+        `;
         _pagination.innerHTML = "";
         _updateCount(0);
     }
 
-    /**
-     * Fisher-Yates shuffle — returns a new shuffled array, doesn't mutate the original.
-     * Used for the random initial render (sprint requirement).
-     */
-    function _shuffle(arr) {
-        const copy = [...arr];
-        for (let i = copy.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [copy[i], copy[j]] = [copy[j], copy[i]];
+    function _shuffle(list) {
+        const copy = [...list];
+        for (let index = copy.length - 1; index > 0; index -= 1) {
+            const randomIndex = Math.floor(Math.random() * (index + 1));
+            [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
         }
         return copy;
+    }
+
+    function _canUseFavorites() {
+        return Boolean(window.Favorites?.canUseFavorites?.());
+    }
+
+    function _favoriteCount() {
+        return window.Favorites?.getCount?.() || 0;
+    }
+
+    function _applyFavoritesFilter(list) {
+        if (!_favoritesOnly || !_canUseFavorites()) {
+            return [...list];
+        }
+
+        return list.filter((product) => Boolean(window.Favorites?.isFavorite?.(product.id)));
+    }
+
+    function _currentEmptyMessage() {
+        if (_favoritesOnly) {
+            return _searchInput?.value?.trim()
+                ? "No tienes favoritos que coincidan con esa busqueda."
+                : "Todavia no agregaste juegos a tus favoritos.";
+        }
+
+        return "No se encontraron juegos con ese criterio.";
+    }
+
+    function _syncHeading() {
+        if (_sectionTitle) {
+            _sectionTitle.textContent = _favoritesOnly ? "Mis favoritos" : "Catalogo";
+        }
+    }
+
+    function _syncFavoritesButton() {
+        if (!_favoritesBtn) return;
+
+        const enabled = _canUseFavorites();
+        const count = _favoriteCount();
+
+        _favoritesBtn.hidden = !enabled;
+        if (!enabled) {
+            _favoritesOnly = false;
+            _favoritesBtn.classList.remove("btn-filter--active");
+            _favoritesBtn.setAttribute("aria-pressed", "false");
+            _favoritesBtn.textContent = "Mis favoritos";
+            _favoritesBtn.title = "";
+            _syncHeading();
+            return;
+        }
+
+        _favoritesBtn.textContent = count > 0 ? `Mis favoritos (${count})` : "Mis favoritos";
+        _favoritesBtn.classList.toggle("btn-filter--active", _favoritesOnly);
+        _favoritesBtn.setAttribute("aria-pressed", _favoritesOnly ? "true" : "false");
+        _favoritesBtn.title = _favoritesOnly ? "Mostrar todo el catalogo" : "Ver solo tus juegos favoritos";
+        _syncHeading();
+    }
+
+    function _refreshRenderedList() {
+        if (!_canUseFavorites()) {
+            _favoritesOnly = false;
+        }
+
+        _currentList = _applyFavoritesFilter(_sourceList);
+        const totalPages = Math.ceil(_currentList.length / PAGE_SIZE);
+
+        if (_currentPage > totalPages) {
+            _currentPage = totalPages || 1;
+        }
+
+        _syncFavoritesButton();
+        _renderPage();
+    }
+
+    function _setList(list, shuffle = false) {
+        _sourceList = shuffle ? _shuffle(list) : [...list];
+        _currentPage = 1;
+        _refreshRenderedList();
     }
 
     function _createCard(product, index) {
@@ -58,18 +131,30 @@ const UI = (() => {
         card.style.animationDelay = `${0.05 + index * 0.05}s`;
         card.innerHTML = buildCardHTML(product);
 
-        card.addEventListener("click", () => Router.navigateTo(product.id));
-        card.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") Router.navigateTo(product.id);
+        const openDetail = () => Router.navigateTo(product.id);
+        const favoriteBtn = card.querySelector("[data-action='toggle-favorite']");
+
+        favoriteBtn?.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            window.Favorites?.toggleFavorite?.(product.id);
+        });
+
+        favoriteBtn?.addEventListener("keydown", (event) => {
+            event.stopPropagation();
+        });
+
+        card.addEventListener("click", openDetail);
+        card.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openDetail();
+            }
         });
 
         return card;
     }
 
-    /**
-     * Renders the current page slice into the grid.
-     * Always uses 2 columns (sprint requirement).
-     */
     function _renderPage() {
         _grid.innerHTML = "";
 
@@ -78,24 +163,27 @@ const UI = (() => {
         const pageItems = _currentList.slice(start, start + PAGE_SIZE);
 
         if (pageItems.length === 0) {
-            _grid.innerHTML = buildNoResultsHTML();
+            if (!_hasLoadedProducts) {
+                _grid.innerHTML = "";
+                _pagination.innerHTML = "";
+                _updateCount(0);
+                return;
+            }
+
+            _grid.innerHTML = buildNoResultsHTML(_currentEmptyMessage());
             _pagination.innerHTML = "";
             _updateCount(0);
             return;
         }
 
         const fragment = document.createDocumentFragment();
-        pageItems.forEach((product, i) => fragment.appendChild(_createCard(product, i)));
+        pageItems.forEach((product, index) => fragment.appendChild(_createCard(product, index)));
         _grid.appendChild(fragment);
 
         _updateCount(_currentList.length);
         _renderPagination(totalPages);
     }
 
-    /**
-     * Renders pagination controls: inicio | ← anterior | pages | siguiente →
-     * Only shown when there is more than one page.
-     */
     function _renderPagination(totalPages) {
         _pagination.innerHTML = "";
 
@@ -112,47 +200,35 @@ const UI = (() => {
             startPage = Math.max(1, endPage - pageWindowCount + 1);
         }
 
-        // helper to create a pagination button
         function _makeBtn(label, page, disabled, active) {
             const btn = document.createElement("button");
             btn.className = "pagination__btn" + (active ? " pagination__btn--active" : "");
             btn.textContent = label;
             btn.disabled = disabled;
+
             if (!disabled) {
                 btn.addEventListener("click", () => {
                     _currentPage = page;
                     _renderPage();
-                    // scroll back to top of grid
                     _grid.scrollIntoView({ behavior: "smooth", block: "start" });
                 });
             }
+
             return btn;
         }
 
-        // inicio button
-        _pagination.appendChild(_makeBtn("« Inicio", 1, _currentPage === 1, false));
-        // anterior button
-        _pagination.appendChild(_makeBtn("‹ Anterior", _currentPage - 1, _currentPage === 1, false));
+        _pagination.appendChild(_makeBtn("Inicio", 1, _currentPage === 1, false));
+        _pagination.appendChild(_makeBtn("Anterior", _currentPage - 1, _currentPage === 1, false));
 
-        // page number buttons
-        for (let p = startPage; p <= endPage; p++) {
-            _pagination.appendChild(_makeBtn(String(p), p, false, p === _currentPage));
+        for (let page = startPage; page <= endPage; page += 1) {
+            _pagination.appendChild(_makeBtn(String(page), page, false, page === _currentPage));
         }
 
-        // siguiente button
-        _pagination.appendChild(_makeBtn("Siguiente ›", _currentPage + 1, _currentPage === totalPages, false));
+        _pagination.appendChild(_makeBtn("Siguiente", _currentPage + 1, _currentPage === totalPages, false));
     }
 
-    // ── Public API ────────────────────────────────────────────────────────────
-
-    /**
-     * Sets the active product list and resets to page 1.
-     * Pass shuffle=true for the initial random render.
-     */
     function renderGrid(list, shuffle = false) {
-        _currentList = shuffle ? _shuffle(list) : list;
-        _currentPage = 1;
-        _renderPage();
+        _setList(list, shuffle);
     }
 
     function init() {
@@ -160,6 +236,10 @@ const UI = (() => {
         _countEl = document.getElementById("productCount");
         _searchInput = document.getElementById("searchInput");
         _pagination = document.getElementById("pagination");
+        _favoritesBtn = document.getElementById("favoritesBtn");
+        _sectionTitle = document.getElementById("catalogTitle");
+
+        if (!_grid || !_countEl || !_searchInput || !_pagination) return;
 
         _searchInput.addEventListener("input", function () {
             const value = this.value;
@@ -175,19 +255,39 @@ const UI = (() => {
                     const filtered = await searchGames(value);
                     if (token !== _searchToken) return;
                     renderGrid(filtered, false);
-                } catch (error) {
+                } catch {
                     if (token !== _searchToken) return;
                     _showGridError("No se pudo cargar la busqueda desde el servidor.");
                 }
             }, SEARCH_DEBOUNCE_MS);
         });
+
+        _favoritesBtn?.addEventListener("click", () => {
+            if (!_canUseFavorites()) return;
+
+            _favoritesOnly = !_favoritesOnly;
+            _currentPage = 1;
+            _refreshRenderedList();
+        });
+
+        window.addEventListener("auth:changed", () => {
+            _refreshRenderedList();
+        });
+
+        window.addEventListener("favorites:changed", () => {
+            _refreshRenderedList();
+        });
+
+        _syncFavoritesButton();
     }
 
     async function loadInitialProducts() {
         try {
             const list = await fetchGames();
+            _hasLoadedProducts = true;
             renderGrid(list, true);
-        } catch (error) {
+        } catch {
+            _hasLoadedProducts = true;
             _showGridError("No se pudo cargar el catalogo desde el backend.");
         }
     }

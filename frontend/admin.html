@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>TonkiSTORE — Panel de administración</title>
+        <title>TonkiSTORE - Panel de administracion</title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -11,93 +11,284 @@
         <link rel="stylesheet" href="css/admin.css" />
     </head>
 
-    <body>
-        <!-- ─── Header ──────────────────────────────────────────────────── -->
-        <header class="header">
-            <div class="header__inner">
-                <a href="index.html" class="logo">
-                    <div class="logo__icon"></div>
-                    <span class="logo__text">TONKI<span>STORE</span></span>
-                </a>
-                <nav class="header__nav" style="margin-left: auto">
-                    <a href="index.html" class="btn-auth btn-auth--outline">← Volver al sitio</a>
-                </nav>
+    <body data-page="admin">
+        <!-- Login modal (se muestra si no está autenticado) -->
+        <div id="loginModal" class="login-page" hidden>
+            <div style="max-width: 540px; margin: 0 auto 12px">
+                <div style="background: #fff7cc; border: 2px solid #ffd42a; padding: 10px; border-radius: 6px; text-align: center; font-weight: 600; color: #333">Cuenta de prueba administrador: <strong>prueba@gmail.com</strong> — contraseña: <strong>password</strong></div>
             </div>
-        </header>
+            <div class="login-card">
+                <h2 class="login-title">Iniciar sesion</h2>
+                <form id="loginForm" class="register-form">
+                    <div class="form-group">
+                        <label for="loginEmail" class="form-label">Correo electronico</label>
+                        <input type="email" id="loginEmail" name="email" class="form-input" placeholder="tu@correo.com" required autocomplete="email" />
+                        <span class="form-error" id="loginErrorEmail"></span>
+                    </div>
 
-        <!-- ─── Admin form ──────────────────────────────────────────────── -->
-        <div class="admin-page">
-            <div class="admin-page__heading">
-                <p class="admin-page__label">// Administración</p>
-                <h1 class="admin-page__title">Agregar producto</h1>
+                    <div class="form-group">
+                        <label for="loginPassword" class="form-label">Contrasena</label>
+                        <input type="password" id="loginPassword" name="password" class="form-input" placeholder="Tu contrasena" required autocomplete="current-password" />
+                        <span class="form-error" id="loginErrorPassword"></span>
+                    </div>
+
+                    <div id="loginGeneralError" class="form-error form-error--general"></div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit" id="loginSubmitBtn">Iniciar sesion</button>
+                        <button type="button" class="btn-cancel" id="loginCancelBtn">Cancelar</button>
+                    </div>
+                </form>
             </div>
-
-            <div id="formMsg" class="form-msg"></div>
-
-            <!-- nombre -->
-            <div class="form-group">
-                <label for="fieldName">Nombre del producto</label>
-                <input type="text" id="fieldName" placeholder="Ej: Elden Ring" autocomplete="off" />
-            </div>
-
-            <!-- descripción -->
-            <div class="form-group">
-                <label for="fieldDesc">Descripción</label>
-                <textarea id="fieldDesc" rows="1" placeholder="Descripción detallada del producto..."></textarea>
-            </div>
-
-            <!-- precio y precio original en la misma fila -->
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="fieldPrice">Precio (USD)</label>
-                    <input type="number" id="fieldPrice" min="0" step="0.01" placeholder="29.99" />
-                </div>
-                <div class="form-group">
-                    <label for="fieldOriginal">Precio original</label>
-                    <input type="number" id="fieldOriginal" min="0" step="0.01" placeholder="49.99" />
-                </div>
-            </div>
-
-            <!-- géneros -->
-            <div class="form-group">
-                <label for="fieldTags">Géneros (separados por coma)</label>
-                <input type="text" id="fieldTags" placeholder="RPG, Acción, Indie" />
-            </div>
-
-            <!-- fecha -->
-            <div class="form-group">
-                <label for="fieldRelease">Fecha de lanzamiento</label>
-                <input type="text" id="fieldRelease" placeholder="15 ene 2026" />
-            </div>
-
-            <!-- imágenes -->
-            <div class="form-group">
-                <label>Imágenes</label>
-                <div class="upload-area" id="uploadArea">
-                    <input type="file" id="fieldImages" accept="image/*" multiple />
-                    <p class="upload-area__label">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="17 8 12 3 7 8" />
-                            <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
-                        <span>Elegí archivos</span> o arrastrá acá — PNG, JPG, WEBP
-                    </p>
-                </div>
-                <div class="image-previews" id="imagePreviews"></div>
-            </div>
-
-            <button class="btn-submit" id="submitBtn" type="button">Guardar producto</button>
         </div>
 
-        <!-- ─── Footer ──────────────────────────────────────────────────── -->
-        <footer class="footer">
-            <div class="footer__inner">
-                <span class="footer__copy">© 2026 TonkiSTORE. Todos los derechos reservados.</span>
+        <div id="adminPage" class="admin-page-wrapper" hidden>
+            <div style="background: #eef7ff; border: 1px solid #cbe6ff; padding: 10px; margin: 12px; border-radius: 6px; text-align: center; font-weight: 600; color: #1b3a57">¿Querés probar el panel? Usá la cuenta de prueba: <strong>prueba@gmail.com</strong> / <strong>password</strong></div>
+            <header class="header">
+                <div class="header__inner">
+                    <a href="index.html" class="logo">
+                        <div class="logo__icon"></div>
+                        <span class="logo__text">TONKI<span>STORE</span></span>
+                    </a>
+
+                    <nav class="header__nav header__nav--admin" style="margin-left: auto">
+                        <a href="index.html" class="btn-auth btn-auth--outline">&larr; Volver al sitio</a>
+
+                        <div class="auth-user auth-user--hidden" id="authUserMenu" hidden>
+                            <button class="auth-user__trigger" id="avatarBtn" type="button" aria-label="Abrir menu de usuario" aria-haspopup="true" aria-expanded="false">
+                                <span class="auth-user__avatar" id="avatarInitials">TS</span>
+                                <span class="auth-user__name" id="avatarName">Usuario</span>
+                            </button>
+
+                            <div class="auth-user__menu" id="avatarMenu" hidden>
+                                <p class="auth-user__menu-name" id="authMenuName">Usuario</p>
+                                <p class="auth-user__menu-email" id="authMenuEmail">usuario@correo.com</p>
+                                <button class="auth-user__logout" id="logoutBtn" type="button">Cerrar sesion</button>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </header>
+
+            <div class="admin-page">
+                <div id="adminAccessNotice" class="admin-notice" hidden>
+                    <p class="admin-notice__title">Vista del panel de administracion</p>
+                    <p class="admin-notice__text" id="adminAccessNoticeText"></p>
+                </div>
+
+                <!-- Sección principal: tabla de productos -->
+                <div id="productsSection" class="admin-section">
+                    <div class="admin-page__heading admin-page__heading--compact admin-page__heading--row">
+                        <div>
+                            <h1 class="admin-page__title">Productos</h1>
+                        </div>
+                        <button class="btn-add-product" id="addProductBtn" type="button">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                            Agregar producto
+                        </button>
+                    </div>
+
+                    <div class="products-admin-controls">
+                        <div class="products-search-wrap">
+                            <svg class="products-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                            <input type="text" id="productsSearchInput" placeholder="Buscar por nombre..." class="products-search-input" autocomplete="off" />
+                        </div>
+                        <button class="btn-refresh" id="refreshProductsBtn" type="button">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 4 23 10 17 10" />
+                                <polyline points="1 20 1 14 7 14" />
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                            </svg>
+                            Actualizar
+                        </button>
+                    </div>
+
+                    <div id="productsMsg" class="form-msg"></div>
+                    <p id="productsEmpty" class="admin-empty" hidden>No hay productos para mostrar.</p>
+
+                    <div class="products-table-wrap">
+                        <table class="products-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-img"></th>
+                                    <th class="col-name">Nombre</th>
+                                    <th class="col-genre">Género</th>
+                                    <th class="col-price">Precio</th>
+                                    <th class="col-discount">Desc.</th>
+                                    <th class="col-actions"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="products-pagination" id="productsPagination" hidden>
+                        <button class="pagination-btn" id="paginationPrev" type="button" aria-label="Pagina anterior">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 18 9 12 15 6" />
+                            </svg>
+                        </button>
+                        <span class="pagination-info" id="paginationInfo">1 / 1</span>
+                        <button class="pagination-btn" id="paginationNext" type="button" aria-label="Pagina siguiente">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="usersSection" class="admin-section">
+                    <div class="admin-page__heading admin-page__heading--compact">
+                        <div>
+                            <h2 class="admin-page__title admin-page__title--sub">Usuarios</h2>
+                            <p class="admin-page__subtitle">Buscá usuarios y otorgá o quitá permisos de administrador.</p>
+                        </div>
+                    </div>
+
+                    <div class="products-admin-controls">
+                        <div class="products-search-wrap">
+                            <svg class="products-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                            <input type="text" id="usersSearchInput" placeholder="Buscar por nombre o email..." class="products-search-input" autocomplete="off" />
+                        </div>
+                        <button class="btn-refresh" id="refreshUsersBtn" type="button">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 4 23 10 17 10" />
+                                <polyline points="1 20 1 14 7 14" />
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                            </svg>
+                            Actualizar
+                        </button>
+                    </div>
+
+                    <div id="usersMsg" class="form-msg"></div>
+                    <p id="usersEmpty" class="admin-empty" hidden>No hay usuarios para mostrar.</p>
+
+                    <div class="products-table-wrap">
+                        <table class="products-table users-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-user-name">Nombre</th>
+                                    <th class="col-user-email">Email</th>
+                                    <th class="col-user-role">Rol</th>
+                                    <th class="col-user-actions">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="products-pagination" id="usersPagination" hidden>
+                        <button class="pagination-btn" id="usersPaginationPrev" type="button" aria-label="Pagina anterior usuarios">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 18 9 12 15 6" />
+                            </svg>
+                        </button>
+                        <span class="pagination-info" id="usersPaginationInfo">1 / 1</span>
+                        <button class="pagination-btn" id="usersPaginationNext" type="button" aria-label="Pagina siguiente usuarios">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
-        </footer>
+
+            <!-- Modal: agregar / editar producto -->
+            <div id="productModal" class="modal modal--hidden" aria-modal="true" role="dialog" aria-labelledby="productModalTitle">
+                <div class="modal__overlay" id="productModalOverlay"></div>
+                <div class="modal__content modal__content--wide">
+                    <div class="modal__header">
+                        <h2 class="modal__title" id="productModalTitle">Agregar producto</h2>
+                        <button class="modal__close" id="productModalClose" type="button" aria-label="Cerrar modal">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div id="productModalMsg" class="form-msg"></div>
+
+                    <div class="modal-form">
+                        <div class="form-group">
+                            <label for="fieldName">Nombre del producto</label>
+                            <input type="text" id="fieldName" placeholder="Ej: Elden Ring" autocomplete="off" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fieldDesc">Descripcion</label>
+                            <textarea id="fieldDesc" rows="3" placeholder="Descripcion detallada del producto..."></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fieldPrice">Precio (USD)</label>
+                                <input type="number" id="fieldPrice" min="0" step="0.01" placeholder="29.99" />
+                            </div>
+                            <div class="form-group">
+                                <label for="fieldOriginal">Precio original</label>
+                                <input type="number" id="fieldOriginal" min="0" step="0.01" placeholder="49.99" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fieldRelease">Fecha de lanzamiento</label>
+                            <input type="text" id="fieldRelease" placeholder="15 ene 2026" autocomplete="off" />
+                        </div>
+
+                        <div class="form-group genre-picker">
+                            <label for="fieldGenreInput">Género</label>
+                            <div class="genre-input-wrap" id="genreInputWrap">
+                                <input type="text" id="fieldGenreInput" class="genre-tag-input" placeholder="Escribe y presiona Enter" autocomplete="off" />
+                                <div id="genreDropdown" class="genre-dropdown" hidden></div>
+                            </div>
+                            <div id="genreTags" class="selected-genres"></div>
+                            <p class="field-hint">Presioná Enter para agregar cada género. Usá la x para quitar.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Imagen</label>
+                            <div class="upload-area" id="uploadArea">
+                                <input type="file" id="fieldImages" accept="image/*" multiple />
+                                <p class="upload-area__label">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="17 8 12 3 7 8" />
+                                        <line x1="12" y1="3" x2="12" y2="15" />
+                                    </svg>
+                                    <span>Elegi archivos</span> o arrastra aca - PNG, JPG, WEBP
+                                </p>
+                            </div>
+                            <div class="image-previews" id="imagePreviews"></div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-submit" id="submitBtn">Guardar producto</button>
+                            <button type="button" class="btn-cancel" id="productModalCancel">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="footer">
+                <div class="footer__inner">
+                    <span class="footer__copy">&copy; 2026 TonkiSTORE. Todos los derechos reservados.</span>
+                </div>
+            </footer>
+        </div>
 
         <script src="js/data.js"></script>
+        <script src="js/auth.js"></script>
+        <script src="js/features.js"></script>
         <script src="js/admin.js"></script>
     </body>
 </html>

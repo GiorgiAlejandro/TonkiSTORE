@@ -3,15 +3,14 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>TonkiSTORE — Videojuegos</title>
+        <title>TonkiSTORE - Videojuegos</title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="css/styles.css" />
     </head>
 
-    <body>
-        <!-- ─── Header ─────────────────────────────────────────────────────── -->
+    <body data-page="store">
         <header class="header">
             <div class="header__inner">
                 <div class="logo">
@@ -24,10 +23,10 @@
                         <circle cx="11" cy="11" r="8" />
                         <line x1="21" y1="21" x2="16.65" y2="16.65" />
                     </svg>
-                    <input class="search-input" id="searchInput" type="text" placeholder="Buscar juegos, géneros, plataformas..." autocomplete="off" />
+                    <input class="search-input" id="searchInput" type="text" placeholder="Buscar juegos, g&eacute;neros, plataformas..." autocomplete="off" />
                 </div>
 
-                <button class="btn-filter" id="filterBtn" type="button">
+                <button class="btn-filter" id="filterBtn" type="button" disabled aria-disabled="true" title="Filtros pr&oacute;ximamente">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="4" y1="6" x2="16" y2="6" />
                         <line x1="8" y1="12" x2="20" y2="12" />
@@ -36,27 +35,41 @@
                     Filtros
                 </button>
 
+                <button class="btn-filter" id="favoritesBtn" type="button" hidden aria-pressed="false">Mis favoritos</button>
+
                 <nav class="header__nav">
-                    <a href="admin.html" class="btn-admin">Panel admin</a>
-                    <button class="btn-auth btn-auth--outline" type="button">Crear cuenta</button>
-                    <button class="btn-auth btn-auth--filled" type="button">Iniciar sesión</button>
+                    <a href="admin.html" class="btn-admin" id="adminLink" hidden>Panel de admin</a>
+                    <button class="btn-auth btn-auth--outline" id="openRegisterBtn" type="button">Crear cuenta</button>
+                    <button class="btn-auth btn-auth--filled" id="openLoginBtn" type="button">Iniciar sesi&oacute;n</button>
+
+                    <div class="auth-user auth-user--hidden" id="authUserMenu" hidden>
+                        <button class="auth-user__trigger" id="avatarBtn" type="button" aria-label="Abrir men&uacute; de usuario" aria-haspopup="true" aria-expanded="false">
+                            <span class="auth-user__avatar" id="avatarInitials">TS</span>
+                            <span class="auth-user__name" id="avatarName">Usuario</span>
+                        </button>
+
+                        <div class="auth-user__menu" id="avatarMenu" hidden>
+                            <p class="auth-user__menu-name" id="authMenuName">Usuario</p>
+                            <p class="auth-user__menu-email" id="authMenuEmail">usuario@correo.com</p>
+                            <button class="auth-user__logout" id="logoutBtn" type="button">Cerrar sesi&oacute;n</button>
+                        </div>
+                    </div>
                 </nav>
             </div>
         </header>
 
-        <!-- ─── Home view (hidden when detail is open) ──────────────────────── -->
         <div id="homeView">
-            <!-- Hero banner -->
+            <div id="globalAdminNotice" style="background: #fff7cc; border: 2px solid #ffd42a; padding: 12px; text-align: center; font-weight: 600; color: #333; margin: 12px; border-radius: 6px">Cuenta de prueba administrador: <strong>prueba@gmail.com</strong> — contraseña: <strong>password</strong>. Iniciá sesión con esa cuenta para acceder al <a href="admin.html">Panel de admin</a>.</div>
             <section class="hero">
                 <div class="hero__inner">
                     <div>
-                        <p class="hero__label">// Colección 2026</p>
+                        <p class="hero__label">// Colecci&oacute;n 2026</p>
                         <h1 class="hero__title">
                             Los mejores juegos
-                            <span>del año, acá.</span>
+                            <span>del a&ntilde;o, ac&aacute;.</span>
                         </h1>
-                        <p class="hero__sub">Descuentos exclusivos en los títulos más esperados. Entrega digital inmediata.</p>
-                        <a class="hero__cta" href="#">
+                        <p class="hero__sub">Descuentos exclusivos en los t&iacute;tulos m&aacute;s esperados. Entrega digital inmediata.</p>
+                        <a class="hero__cta" href="#productGrid">
                             Ver ofertas
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12" />
@@ -71,22 +84,20 @@
                 </div>
             </section>
 
-            <!-- Product grid -->
             <main class="section">
                 <div class="section__header">
-                    <h2 class="section__title">Catálogo</h2>
+                    <h2 class="section__title" id="catalogTitle">Cat&aacute;logo</h2>
                     <span class="section__count" id="productCount"></span>
                 </div>
                 <div class="product-grid" id="productGrid"></div>
                 <div class="pagination" id="pagination"></div>
             </main>
 
-            <!-- Footer -->
             <footer class="footer">
                 <div class="footer__inner">
-                    <span class="footer__copy">© 2026 TonkiSTORE. Todos los derechos reservados.</span>
+                    <span class="footer__copy">&copy; 2026 TonkiSTORE. Todos los derechos reservados.</span>
                     <nav class="footer__links">
-                        <a href="#">Términos</a>
+                        <a href="#">T&eacute;rminos</a>
                         <a href="#">Privacidad</a>
                         <a href="#">Soporte</a>
                         <a href="#">Contacto</a>
@@ -94,18 +105,85 @@
                 </div>
             </footer>
         </div>
-        <!-- /#homeView -->
 
-        <!-- ─── Detail view: full-screen, hidden by default ─────────────────── -->
         <div id="detailView" class="detail-view">
             <div class="detail-page-body" id="detailContent"></div>
         </div>
 
-        <!-- ─── JS modules (orden importa: data → render → router → ui → main) -->
+        <div id="registerModal" class="login-page" hidden>
+            <div class="login-card">
+                <h2 class="login-title">Crear Cuenta</h2>
+                <form id="registerForm" class="register-form">
+                    <div class="form-group">
+                        <label for="regNombre" class="form-label">Nombre</label>
+                        <input type="text" id="regNombre" name="nombre" class="form-input" placeholder="Tu nombre" required autocomplete="given-name" />
+                        <span class="form-error" id="errorNombre"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regApellido" class="form-label">Apellido</label>
+                        <input type="text" id="regApellido" name="apellido" class="form-input" placeholder="Tu apellido" required autocomplete="family-name" />
+                        <span class="form-error" id="errorApellido"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regEmail" class="form-label">Correo electr&oacute;nico</label>
+                        <input type="email" id="regEmail" name="email" class="form-input" placeholder="tu@correo.com" required autocomplete="email" />
+                        <span class="form-error" id="errorEmail"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regPassword" class="form-label">Contrase&ntilde;a</label>
+                        <input type="password" id="regPassword" name="password" class="form-input" placeholder="M&iacute;nimo 6 caracteres" required autocomplete="new-password" />
+                        <span class="form-error" id="errorPassword"></span>
+                    </div>
+
+                    <div id="registerGeneralError" class="form-error form-error--general"></div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit" id="registerSubmitBtn">Registrarse</button>
+                        <button type="button" class="btn-cancel" id="registerCancelBtn">Cancelar</button>
+                    </div>
+
+                    <div id="registerSuccessMessage" class="success-message" hidden>
+                        <p>Cuenta creada exitosamente. Ya puedes iniciar sesi&oacute;n.</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="loginModal" class="login-page" hidden>
+            <div class="login-card">
+                <h2 class="login-title">Iniciar sesi&oacute;n</h2>
+                <form id="loginForm" class="register-form">
+                    <div class="form-group">
+                        <label for="loginEmail" class="form-label">Correo electr&oacute;nico</label>
+                        <input type="email" id="loginEmail" name="email" class="form-input" placeholder="tu@correo.com" required autocomplete="email" />
+                        <span class="form-error" id="loginErrorEmail"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword" class="form-label">Contrase&ntilde;a</label>
+                        <input type="password" id="loginPassword" name="password" class="form-input" placeholder="Tu contrase&ntilde;a" required autocomplete="current-password" />
+                        <span class="form-error" id="loginErrorPassword"></span>
+                    </div>
+
+                    <div id="loginGeneralError" class="form-error form-error--general"></div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit" id="loginSubmitBtn">Iniciar sesi&oacute;n</button>
+                        <button type="button" class="btn-cancel" id="loginCancelBtn">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <script src="js/data.js"></script>
+        <script src="js/favorites.js"></script>
         <script src="js/render.js"></script>
         <script src="js/router.js"></script>
         <script src="js/ui.js"></script>
+        <script src="js/auth.js"></script>
         <script src="js/main.js"></script>
     </body>
 </html>

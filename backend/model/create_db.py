@@ -14,6 +14,7 @@ def create_tables(cursor: sqlite3.Cursor) -> None:
             name         TEXT    NOT NULL,
             release_date TEXT,
             genre        TEXT,
+            genre_id     INTEGER,
             price_usd    REAL,
             discount_pct INTEGER
         );
@@ -28,6 +29,45 @@ def create_tables(cursor: sqlite3.Cursor) -> None:
             app_id  INTEGER NOT NULL REFERENCES games(app_id),
             tag_id  INTEGER NOT NULL REFERENCES tags(tag_id),
             PRIMARY KEY (app_id, tag_id)
+        );
+
+        -- Tabla de usuarios
+        CREATE TABLE IF NOT EXISTS users (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre          TEXT    NOT NULL,
+            apellido        TEXT    NOT NULL,
+            email           TEXT    NOT NULL UNIQUE,
+            password_hash   TEXT    NOT NULL,
+            is_admin        INTEGER NOT NULL DEFAULT 0,
+            created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS sessions (
+            token       TEXT PRIMARY KEY,
+            user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Tabla de características (features/media)
+        CREATE TABLE IF NOT EXISTS features (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            name        TEXT    NOT NULL UNIQUE,
+            icon        TEXT    NOT NULL,
+            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Tabla de relación N:M entre games y features
+        CREATE TABLE IF NOT EXISTS game_features (
+            app_id      INTEGER NOT NULL REFERENCES games(app_id) ON DELETE CASCADE,
+            feature_id  INTEGER NOT NULL REFERENCES features(id) ON DELETE CASCADE,
+            PRIMARY KEY (app_id, feature_id)
+        );
+        -- Tabla de géneros (para normalizar géneros como catálogo)
+        CREATE TABLE IF NOT EXISTS genres (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            name        TEXT    NOT NULL UNIQUE,
+            icon        TEXT,
+            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
 
@@ -91,3 +131,44 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+    # -- Migration step: ensure existing genre text is normalized into genres table
+    db_path = DB_PATH
+    import sqlite3
+
+    conn = sqlite3.connect(db_path)
+    conn.execute("PRAGMA foreign_keys = ON")
+    cursor = conn.cursor()
+
+    # Add genre_id column if missing
+    cursor.execute("PRAGMA table_info(games)")
+    cols = [r[1] for r in cursor.fetchall()]
+    if "genre_id" not in cols:
+        try:
+            cursor.execute("ALTER TABLE games ADD COLUMN genre_id INTEGER")
+            conn.commit()
+            print("Added 'genre_id' column to games table.")
+        except Exception:
+            pass
+
+    # Ensure genres table exists
+    cursor.execute("CREATE TABLE IF NOT EXISTS genres (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, icon TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+    conn.commit()
+
+    # Migrate distinct genre text values into genres table and set games.genre_id
+    cursor.execute("SELECT DISTINCT genre FROM games WHERE genre IS NOT NULL AND TRIM(genre) <> ''")
+    rows = [r[0] for r in cursor.fetchall()]
+    for g in rows:
+        try:
+            cursor.execute("INSERT OR IGNORE INTO genres (name) VALUES (?)", (g,))
+            conn.commit()
+        except Exception:
+            pass
+
+    # Update games.genre_id from genres
+    cursor.execute("SELECT id, name FROM genres")
+    genres = cursor.fetchall()
+    for gid, name in genres:
+        cursor.execute("UPDATE games SET genre_id = ? WHERE genre = ?", (gid, name))
+    conn.commit()
+    conn.close()
+    print("Migration: genre text values migrated into genres table (genre_id set).")

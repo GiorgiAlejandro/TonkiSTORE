@@ -1,6 +1,6 @@
-# routes/games.py
-from flask import Blueprint, jsonify, request
 from sqlite3 import IntegrityError
+from flask import Blueprint, jsonify, request
+from auth import get_authenticated_user
 from model.games_db import GamesDB
 
 games_bp = Blueprint("games", __name__)
@@ -9,12 +9,19 @@ db = GamesDB()
 
 @games_bp.route("/games", methods=["GET"])
 def get_games():
-    query = request.args.get("q", "").strip()  # /api/games?q=portal
-    genre = request.args.get("genre")  # /api/games?genre=Action
-    tag   = request.args.get("tag")    # /api/games?tag=Multiplayer
+    query = request.args.get("q", "").strip()
+    genre = request.args.get("genre")
+    genre_id = request.args.get("genre_id")
+    tag = request.args.get("tag")
 
     if query:
         games = db.search(query)
+    elif genre_id:
+        try:
+            gid = int(genre_id)
+            games = db.get_by_genre(gid)
+        except Exception:
+            games = []
     elif genre:
         games = db.get_by_genre(genre)
     elif tag:
@@ -25,15 +32,19 @@ def get_games():
     return jsonify(games)
 
 
-# Esta ruta tiene que ir ANTES de /games/<app_id>
-# porque Flask matchea en orden y "search" podria interpretarse como un app_id
 @games_bp.route("/games/search", methods=["GET"])
 def search_games():
     query = request.args.get("q", "").strip()
     if not query:
         return jsonify({"error": "query param 'q' is required"}), 400
-
     return jsonify(db.search(query))
+
+
+@games_bp.route("/tags", methods=["GET"])
+def get_all_tags():
+    """Obtiene todos los tags disponibles."""
+    tags = db.get_all_tags()
+    return jsonify(tags)
 
 
 @games_bp.route("/games/<int:app_id>", methods=["GET"])
@@ -46,6 +57,10 @@ def get_game(app_id: int):
 
 @games_bp.route("/games", methods=["POST"])
 def add_game():
+    _, error = get_authenticated_user(require_admin=True)
+    if error:
+        return error
+
     body = request.get_json(silent=True)
     if body is None:
         return jsonify({"error": "missing JSON body"}), 400
@@ -64,10 +79,14 @@ def add_game():
         price_usd = float(body["price_usd"])
         discount_pct = int(body["discount_pct"])
         release_date = body.get("release_date")
-        genre = body.get("genre")
-        tags = body.get("tags")
 
-        # Accept either an array or a comma-separated string from the client.
+        # Acepta genre_id (singular) O genre_ids (array); el primero tiene prioridad
+        genre_id = body.get("genre_id")
+        genre_ids = body.get("genre_ids")
+        if genre_id is None and genre_ids and isinstance(genre_ids, list):
+            genre_id = genre_ids[0] if genre_ids else None
+
+        tags = body.get("tags")
         if isinstance(tags, str):
             tags = [t.strip() for t in tags.split(",") if t.strip()]
         if tags is not None and not isinstance(tags, list):
@@ -77,7 +96,7 @@ def add_game():
             app_id=app_id,
             name=name,
             release_date=release_date,
-            genre=genre,
+            genre_id=int(genre_id) if genre_id is not None else None,
             price_usd=price_usd,
             discount_pct=discount_pct,
             tags=tags,
@@ -93,12 +112,20 @@ def add_game():
 
 @games_bp.route("/games/<int:app_id>", methods=["PUT"])
 def update_game(app_id: int):
+    _, error = get_authenticated_user(require_admin=True)
+    if error:
+        return error
+
     body = request.get_json()
     if not body:
         return jsonify({"error": "missing JSON body"}), 400
 
-    # Separa tags del resto porque update_game los maneja distinto
-    tags   = body.pop("tags", None)
+    # Normalizar genre_ids → genre_id
+    genre_ids = body.pop("genre_ids", None)
+    if "genre_id" not in body and genre_ids and isinstance(genre_ids, list):
+        body["genre_id"] = genre_ids[0] if genre_ids else None
+
+    tags = body.pop("tags", None)
     fields = body
 
     found = db.update_game(app_id, tags=tags, **fields)
@@ -110,6 +137,10 @@ def update_game(app_id: int):
 
 @games_bp.route("/games/<int:app_id>", methods=["DELETE"])
 def delete_game(app_id: int):
+    _, error = get_authenticated_user(require_admin=True)
+    if error:
+        return error
+
     found = db.delete_game(app_id)
     if not found:
         return jsonify({"error": "game not found"}), 404

@@ -12,146 +12,98 @@ Servidor local: `http://localhost:5000`
 
 Registra un usuario nuevo.
 
-```json
+````json
 {
-    "email": "usuario@example.com",
-    "password": "password123",
-    "first_name": "Juan",
-    "last_name": "Pérez"
-}
-```
+    # API Documentation
 
-### `POST /api/users/login`
+    Referencia de los endpoints más relevantes, incluyendo las nuevas implementaciones de Sprint 3 (favoritos, reservas y búsqueda por fecha).
 
-Inicia sesión y devuelve `token` y `user`.
+    Base: `http://localhost:5000`
 
-### `POST /api/users/logout`
+    ## Autenticación y usuarios
 
-Cierra la sesión actual.
+    - `POST /api/users/register` — Registra un usuario.
+    - `POST /api/users/login` — Inicia sesión y devuelve token/user.
+    - `POST /api/users/logout` — Cierra sesión.
+    - `GET /api/users/me` — Datos del usuario autenticado.
+    - `GET /api/users` — Listar usuarios (admin).
+    - `PUT /api/users/<user_id>/admin` — Asignar/revocar admin (admin only).
 
-### `GET /api/users/me`
+    ## Productos
 
-Devuelve el usuario autenticado.
+    - `GET /api/games` — Listado y filtros.
+    - `GET /api/games/search?q=...` — Búsqueda por texto.
+    - `GET /api/games/search/by-date?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD&q=...` — Buscar juegos disponibles en un rango de fechas.
+    - `GET /api/games/<app_id>` — Detalle del juego (incluye `tags`, `features`, `price_usd`, `discount_pct`, etc.).
+    - `GET /api/games/<app_id>/availability` — Detalle + `occupied_dates` del juego.
+    - `GET /api/games/<app_id>/occupied-dates` — Lista de intervalos ocupados (para calendario/frontend).
+    - `GET /api/games/<app_id>/check-availability?start_date=...&end_date=...` — Verifica disponibilidad en un rango.
+    - `POST /api/games` / `PUT /api/games/<app_id>` / `DELETE /api/games/<app_id>` — CRUD (admin).
 
-### `GET /api/users`
+    ## Favoritos (Sprint 3)
 
-Lista usuarios. Requiere admin.
+    Todos los endpoints de favoritos requieren autenticación del usuario.
 
-### `PUT /api/users/<user_id>/admin`
+    - `GET /api/favorites` — Lista los juegos marcados como favoritos por el usuario autenticado.
+    - `POST /api/favorites/<app_id>` — Marca el juego `app_id` como favorito.
+    - `DELETE /api/favorites/<app_id>` — Remueve de favoritos.
+    - `GET /api/favorites/<app_id>/check` — Devuelve `{ "is_favorite": true|false }`.
 
-Activa o desactiva permisos de administrador. Requiere admin.
+    Ejemplo `GET /api/favorites`:
 
-```json
-{ "is_admin": true }
-```
+    ```json
+    [
+        { "app_id": 730, "name": "Counter-Strike 2", "price_usd": 0.0, "discount_pct": 0 }
+    ]
+    ```
 
-## Productos
+    ## Reservas (Sprint 3)
 
-### `GET /api/games`
+    Todos los endpoints de reservas requieren autenticación.
 
-Lista juegos.
+    - `POST /api/reservations`
+        - Crea una reserva para el usuario autenticado.
+        - Body esperado:
 
-### `GET /api/games/search?q=...`
-
-Busca juegos por texto.
-
-### `GET /api/games/<app_id>`
-
-Devuelve el detalle completo del juego. Incluye `tags` y `features`.
-
-### `POST /api/games`
-
-Crea un juego. Requiere admin.
-
-### `PUT /api/games/<app_id>`
-
-Actualiza un juego. Requiere admin.
-
-### `DELETE /api/games/<app_id>`
-
-Elimina un juego. Requiere admin.
-
-### `GET /api/games/<app_id>/features`
-
-Lista las características asociadas al juego.
-
-### `POST /api/games/<app_id>/features`
-
-Reemplaza las características del juego. Requiere admin.
-
-```json
-{ "feature_ids": [1, 2, 3] }
-```
-
-## Tags y características
-
-### `GET /api/tags`
-
-Devuelve el catálogo de tags que usa el editor de productos.
-
-### `GET /api/features`
-
-Lista características visibles en el detalle del producto.
-
-### `POST /api/features`
-
-### `PUT /api/features/<feature_id>`
-
-### `DELETE /api/features/<feature_id>`
-
-CRUD de características. Solo admin.
-
-## Respuestas esperadas
-
-- Los endpoints que crean recursos devuelven el objeto creado.
-- Los endpoints protegidos retornan `403` cuando no hay sesión de admin.
-- Los errores de validación retornan JSON con `error`.
-
-## Uso desde frontend
-
-- En requests autenticadas, el navegador debe enviar cookies de sesión.
-- El frontend actual consulta `/api/tags` para el selector de géneros y `/api/features` para el detalle del producto.
-  }
-
-````
-
----
-
-### 2. Asociar Características a Producto (Solo Admin)
-**PUT** `/api/games/<app_id>/features`
-
-Body:
-```json
-{
-  "feature_ids": [1, 2, 3]
-}
-````
-
-Response (200):
-
-```json
-{
-    "message": "features associated successfully",
-    "game": {
-        "app_id": 123,
-        "name": "Portal 2",
-        "features": [
-            {
-                "feature_id": 1,
-                "name": "WiFi",
-                "icon": "wifi"
-            }
-        ]
+    ```json
+    {
+        "app_id": 730,
+        "start_date": "2026-05-15",
+        "end_date": "2026-05-20"
     }
-}
-```
+    ```
 
----
+    - `GET /api/reservations` — Lista reservas del usuario.
+    - `GET /api/reservations/<id>` — Detalle de una reserva.
+    - `DELETE /api/reservations/<id>` — Cancela una reserva.
 
-## Notas de Implementación
+    Respuesta exitosa típica (POST):
 
-- **Autenticación**: Se usa sesiones de Flask. El usuario debe estar autenticado para acceder a endpoints que lo requieran.
-- **Permisos Admin**: Solo usuarios con `is_admin = 1` pueden acceder a endpoints administrativos.
-- **Validación**: Se valida que emails sean únicos, nombres tengan al menos 2 caracteres, contraseñas mínimo 6 caracteres.
-- **Seguridad**: Las contraseñas se hashean con werkzeug.security.
-- **CORS**: Habilitado para permitir requests desde otros puertos (ej: Live Server del frontend).
+    ```json
+    {
+        "message": "Reservation created successfully",
+        "app_id": 730,
+        "start_date": "2026-05-15",
+        "end_date": "2026-05-20",
+        "user_id": 1,
+        "status": "confirmed"
+    }
+    ```
+
+    ## Formatos y convenciones
+
+    - Todas las fechas usan ISO `YYYY-MM-DD`.
+    - Endpoints protegidos requieren `Authorization: Bearer <token>` o sesión activa (cookies), según configuración.
+    - Errores de validación devuelven JSON con `error` y código HTTP apropiado.
+
+    ## Notas de integración frontend
+
+    - El frontend solicita listas de juegos y mapea campos `image`, `image_url` y `price_usd` para mostrar miniaturas.
+    - Eventos del frontend relevantes: `products:updated`, `favorites:changed`, `auth:changed`.
+    - Para crear reservas el frontend usa `POST /api/reservations` con las cabeceras de autenticación.
+
+    ---
+
+    Para detalles completos de payloads y ejemplos, ver `API_ENDPOINTS_SPRINT3.md` y `SPRINT_3_CHANGES.md`.
+- Los errores de validación retornan JSON con `error`.
+````

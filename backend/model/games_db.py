@@ -189,3 +189,68 @@ class GamesDB:
             cursor = conn.cursor()
             cursor.execute("SELECT tag_id as id, name FROM tags ORDER BY name")
             return [dict(row) for row in cursor.fetchall()]
+
+    def search_by_date_range(
+        self, start_date: str, end_date: str
+    ) -> list[dict[str, Any]]:
+        """
+        Busca productos que estén disponibles en el rango de fechas especificado.
+        Las fechas deben estar en formato ISO (YYYY-MM-DD).
+        Retorna productos que NO tienen reservas en ese rango.
+        """
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            # Obtiene todos los app_ids que NO tienen conflicto de fechas
+            cursor.execute(
+                """
+                SELECT DISTINCT g.app_id 
+                FROM games g
+                WHERE g.app_id NOT IN (
+                    SELECT DISTINCT app_id FROM reservations
+                    WHERE status = 'confirmed'
+                    AND (
+                        (start_date <= ? AND end_date >= ?)
+                        OR (start_date <= ? AND end_date >= ?)
+                        OR (start_date >= ? AND end_date <= ?)
+                    )
+                )
+                ORDER BY RANDOM()
+                """,
+                (end_date, start_date, end_date, start_date, end_date, start_date),
+            )
+
+            app_ids = [row[0] for row in cursor.fetchall()]
+            games = []
+            for app_id in app_ids:
+                game = self.get_game(app_id)
+                if game:
+                    games.append(game)
+            return games
+
+    def get_game_with_availability(
+        self, app_id: int
+    ) -> dict[str, Any] | None:
+        """
+        Obtiene un juego con su información de disponibilidad.
+        Incluye la lista de fechas ocupadas en el JSON.
+        """
+        game = self.get_game(app_id)
+        if game is None:
+            return None
+
+        # Obtiene las fechas ocupadas
+        with self._connect() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT start_date, end_date 
+                FROM reservations
+                WHERE app_id = ? AND status = 'confirmed'
+                ORDER BY start_date ASC
+                """,
+                (app_id,),
+            )
+            occupied_dates = [dict(row) for row in cursor.fetchall()]
+
+        game["occupied_dates"] = occupied_dates
+        return game

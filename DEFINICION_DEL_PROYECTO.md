@@ -7,3 +7,21 @@ La aplicacion fue construida utilizando un backend en Python con Flask, una base
 Como fuente de datos, se utilizo una base de datos encontrada en linea, que contiene los 1000 juegos mas populares de Steam. A partir de esa informacion se implementaron funcionalidades de consulta, busqueda, filtrado y visualizacion detallada de los juegos.
 
 El objetivo principal del proyecto fue integrar una interfaz moderna con una API funcional, permitiendo explorar el catalogo, acceder al detalle de cada juego y administrar nuevos registros desde un panel dedicado.
+
+## Nuevas implementaciones (Sprint 3)
+
+Durante Sprint 3 se añadieron varias funcionalidades importantes que amplían tanto la experiencia de usuario como las capacidades del backend:
+
+- Sistema de Favoritos: usuarios autenticados pueden marcar/desmarcar juegos como favoritos y acceder a una vista dedicada con sus favoritos.
+- Sistema de Reservas: los usuarios pueden reservar juegos por rango de fechas; el backend valida conflictos y almacena las reservas.
+- Búsqueda por Fecha: se puede filtrar el catálogo por disponibilidad en un rango de fechas (`start_date`, `end_date`).
+- Flujo de alquiler/reserva en detalle de producto: la vista de detalle muestra inputs de fecha, calcula precio por día y total (regla: precio por día = precio_con_descuento / 30, redondeado) y permite confirmar reserva.
+- Integración frontend-backend: nuevos endpoints y módulos JS (`favorites-view.js`, `detail-availability.js`, `search-advanced.js`) y eventos para mantener la UI sincronizada (`products:updated`, `favorites:changed`).
+
+Estas implementaciones permiten casos de uso como:
+
+- Marcar y gestionar una lista personal de favoritos.
+- Buscar juegos que estén disponibles en fechas concretas para planificar alquileres.
+- Reservar un juego por un período limitado, con validación de solapamientos.
+
+Para más detalles técnicos y ejemplos de uso, ver `backend/API_ENDPOINTS_SPRINT3.md` y `backend/SPRINT_3_CHANGES.md`.

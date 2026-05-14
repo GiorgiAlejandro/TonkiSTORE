@@ -135,6 +135,10 @@ async function _fetchJson(url, options = {}) {
 async function fetchGames() {
     const games = await _fetchJson(`${API_BASE_URL}/games`);
     products = games.map(mapGameToProduct);
+    // Notify listeners that product list updated
+    try {
+        window.dispatchEvent(new CustomEvent("products:updated", { detail: { count: products.length } }));
+    } catch {}
     return products;
 }
 
@@ -144,6 +148,9 @@ async function searchGames(query) {
 
     const games = await _fetchJson(`${API_BASE_URL}/games?q=${encodeURIComponent(q)}`);
     products = games.map(mapGameToProduct);
+    try {
+        window.dispatchEvent(new CustomEvent("products:updated", { detail: { count: products.length } }));
+    } catch {}
     return products;
 }
 

@@ -1,33 +1,37 @@
 # Backend
 
-Backend Flask de TonkiSTORE con autenticación, administración, productos y catálogo de tags/características.
+Backend Flask de TonkiSTORE con autenticación, administración, catálogo de productos y las nuevas funciones implementadas en Sprint 3: **Favoritos**, **Reservas** y **Búsqueda por fecha**.
 
 ## Arranque rápido
 
 ```bash
 pip install -r requirements.txt
-python model/create_db.py
-python init_test_data.py
+python model/create_db.py   # crea tablas nuevas (favorites, reservations) sin borrar datos existentes
+python init_test_data.py    # opcional: datos de ejemplo
 python app.py
 ```
 
-Servidor: `http://localhost:5000`
+Servidor local: `http://localhost:5000`
 
-## Datos de prueba
+## Qué se agregó en Sprint 3
 
-- Admin de prueba: `prueba@gmail.com`
-- Password: `password`
+- Sistema de Favoritos: endpoints para añadir/quitar/ver favoritos del usuario.
+- Sistema de Reservas: crear/consultar/cancelar reservas con validación de solapamientos.
+- Búsqueda por rango de fechas: encontrar juegos disponibles entre dos fechas.
+- Endpoints de disponibilidad por juego para consultar intervalos ocupados.
 
-Este usuario es creado por `init_test_data.py` para pruebas rápidas.
+## Endpoints principales (resumen)
 
-## Qué expone
+- Autenticación: `POST /api/users/login`, `POST /api/users/register`, `GET /api/users/me`.
+- Productos: `GET /api/games`, `GET /api/games/<app_id>`, `GET /api/games/search/by-date`.
+- Favoritos: `GET /api/favorites`, `POST /api/favorites/<app_id>`, `DELETE /api/favorites/<app_id>`.
+- Reservas: `POST /api/reservations`, `GET /api/reservations`, `DELETE /api/reservations/<id>`.
 
-- Autenticación y sesión: `POST /api/users/register`, `POST /api/users/login`, `POST /api/users/logout`, `GET /api/users/me`
-- Administración de usuarios: `GET /api/users`, `PUT /api/users/<id>/admin`
-- Productos: `GET /api/games`, `GET /api/games/search`, `GET /api/games/<app_id>`, `POST /api/games`, `PUT /api/games/<app_id>`, `DELETE /api/games/<app_id>`
-- Tags: `GET /api/tags`
-- Características: `GET /api/features`, `POST /api/features`, `PUT /api/features/<id>`, `DELETE /api/features/<id>`
-- Asignación de características a producto: `GET /api/games/<app_id>/features`, `POST /api/games/<app_id>/features`
+Ver `API_ENDPOINTS_SPRINT3.md` y `SPRINT_3_CHANGES.md` para ejemplos y detalles.
+
+## Base de datos
+
+Se agregaron las tablas `favorites` y `reservations`. Ejecutar `python model/create_db.py` para crear/actualizar la estructura.
 
 ## Pruebas
 
@@ -35,8 +39,10 @@ Este usuario es creado por `init_test_data.py` para pruebas rápidas.
 python test_api.py
 ```
 
-## Notas
+## Notas de implementación
 
-- Las rutas administrativas requieren sesión de admin.
-- El frontend usa cookies de sesión y el catálogo de tags para el editor de productos.
-- La base SQLite está en `model/data/games.db`.
+- Las rutas de favoritos y reservas requieren autenticación; el backend valida que el usuario solo acceda/modifique sus propios recursos.
+- Las fechas usan formato `YYYY-MM-DD`.
+- Para integrarse con el frontend, el backend expone los campos `image_url`, `price_usd` y `discount_pct` en los objetos de juego.
+
+Para instrucciones de despliegue y detalles de endpoints ver los archivos de documentación.

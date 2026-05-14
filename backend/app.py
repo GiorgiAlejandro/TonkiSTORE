@@ -6,6 +6,8 @@ from routes.games import games_bp
 from routes.users import users_bp
 from routes.features import features_bp
 from routes.genres import genres_bp
+from routes.favorites import favorites_bp
+from routes.reservations import reservations_bp
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -18,6 +20,8 @@ def create_app() -> Flask:
     app.register_blueprint(users_bp, url_prefix="/api")
     app.register_blueprint(features_bp, url_prefix="/api")
     app.register_blueprint(genres_bp, url_prefix="/api")
+    app.register_blueprint(favorites_bp, url_prefix="/api")
+    app.register_blueprint(reservations_bp, url_prefix="/api")
     
     # ===== SIRVIENDO ARCHIVOS ESTÁTICOS DEL FRONTEND =====
     frontend_dir = Path(__file__).parent.parent / "frontend"

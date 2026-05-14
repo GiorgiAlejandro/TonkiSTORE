@@ -243,7 +243,7 @@
 
 /* Anchos de columnas */
 .products-table .col-img {
-    width: 56px;
+    width: 96px;
 }
 .products-table .col-name {
     min-width: 180px;
@@ -306,10 +306,12 @@
 
 .products-table__thumb {
     display: block;
-    width: 40px;
-    height: 40px;
+    width: 72px;
+    aspect-ratio: 460 / 215;
+    height: auto;
     border-radius: 6px;
     object-fit: cover;
+    overflow: hidden;
     border: 1px solid var(--border-bright);
 }
 

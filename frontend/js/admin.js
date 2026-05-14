@@ -393,7 +393,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             // Bug 1 fix: leer imagen desde overrides locales O desde el objeto
             const overrides = window.getProductOverrides?.(pid) ?? {};
-            const image = overrides.image || product.image || product.header_image || (Array.isArray(product.images) ? product.images[0] : null) || "";
+            const image = overrides.image || product.image || product.image_url || product.header_image || (Array.isArray(product.images) ? product.images[0] : null) || "";
 
             const imageHtml = image ? `<img class="products-table__thumb" src="${escapeHtml(image)}" alt="" loading="lazy" onerror="this.style.display='none'" />` : `<div class="products-table__thumb products-table__thumb--empty"></div>`;
 

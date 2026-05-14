@@ -1,38 +1,34 @@
 # Guía del Panel de Administración
 
-> NOTA IMPORTANTE: Cuenta de prueba administrador: **prueba@gmail.com** — contraseña: **password**. Está creada por el script de datos de prueba.
+Acceso rápido al panel de administración para crear/editar productos, gestionar usuarios y administrar características.
 
 ## Acceso
 
-Hay dos formas de entrar:
-
-1. Ir directo a `admin.html`.
-2. Desde la tienda principal, usar el botón `Panel de admin` del header. Solo aparece para usuarios autenticados con rol de administrador.
+1. Abrir `admin.html` en el navegador.
+2. Desde la tienda principal, usar el botón `Panel de admin` del header (visible solo para admins autenticados).
 
 ## Qué permite hacer
 
-- Ver, buscar, crear, editar y eliminar productos.
-- Gestionar usuarios y dar o quitar permisos de admin.
-- Administrar características y tags desde el editor de productos.
+- Listar, buscar, crear, editar y eliminar productos.
+- Gestionar usuarios y asignar/remover permisos de admin.
+- Administrar `features` y `tags` desde el editor de producto.
+
+## Notas importantes sobre cambios recientes
+
+- Se eliminaron los banners públicos que mostraban credenciales de prueba en el frontend.
+- Miniaturas de producto en el panel ahora usan la propiedad `image_url` proporcionada por el backend cuando esté disponible. Si no hay `image_url`, se usa `image` o una imagen por defecto.
+- Se ajustó el CSS de las miniaturas para mantener la misma relación que la vista pública de productos.
 
 ## Editor de producto
 
-- El campo de géneros funciona con chips: escribís, presionás Enter y se agrega debajo.
-- Las sugerencias excluyen lo que ya elegiste.
-- La `x` de cada chip lo quita de la selección.
+- El campo de géneros usa chips: escribe y presiona Enter para añadir. Las sugerencias excluyen las opciones ya seleccionadas.
 
-## Usuarios
+## Requisitos
 
-- La tabla de usuarios se puede buscar y paginar.
-- El botón de admin está deshabilitado para la propia cuenta activa.
+- Backend en `http://localhost:5000` corriendo.
+- Usuario con rol admin autenticado (sesión basada en cookies o token según configuración).
 
-## Requisitos para usarlo
+## Rutas útiles
 
-- El backend debe estar ejecutándose.
-- Necesitás una cuenta administradora.
-- La sesión se guarda con cookies del navegador.
-
-## Ruta útil
-
-- Backend: `http://localhost:5000/admin`
+- Backend admin: `http://localhost:5000/admin`
 - Frontend estático: `admin.html`

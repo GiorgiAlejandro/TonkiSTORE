@@ -26,7 +26,7 @@
                     <input class="search-input" id="searchInput" type="text" placeholder="Buscar juegos, g&eacute;neros, plataformas..." autocomplete="off" />
                 </div>
 
-                <button class="btn-filter" id="filterBtn" type="button" disabled aria-disabled="true" title="Filtros pr&oacute;ximamente">
+                <button class="btn-filter" id="filterBtn" type="button" title="Abrir filtros" aria-label="Abrir filtros">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="4" y1="6" x2="16" y2="6" />
                         <line x1="8" y1="12" x2="20" y2="12" />
@@ -59,7 +59,6 @@
         </header>
 
         <div id="homeView">
-            <div id="globalAdminNotice" style="background: #fff7cc; border: 2px solid #ffd42a; padding: 12px; text-align: center; font-weight: 600; color: #333; margin: 12px; border-radius: 6px">Cuenta de prueba administrador: <strong>prueba@gmail.com</strong> — contraseña: <strong>password</strong>. Iniciá sesión con esa cuenta para acceder al <a href="admin.html">Panel de admin</a>.</div>
             <section class="hero">
                 <div class="hero__inner">
                     <div>
@@ -108,6 +107,117 @@
 
         <div id="detailView" class="detail-view">
             <div class="detail-page-body" id="detailContent"></div>
+        </div>
+
+        <div id="searchView" class="search-view" style="display: none">
+            <div class="search-container">
+                <button class="search-view__back-btn" id="searchBackBtn" aria-label="Volver">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                </button>
+
+                <section class="search-block">
+                    <h2 class="search-block__title">Búsqueda Avanzada</h2>
+                    <p class="search-block__description">Busca juegos por título, género o características. Usa el calendario para filtrar por fecha de lanzamiento.</p>
+
+                    <form id="advancedSearchForm" class="search-form">
+                        <!-- Búsqueda de palabras clave -->
+                        <div class="search-form__group">
+                            <label for="searchKeyword" class="search-form__label">Palabras clave</label>
+                            <div class="search-input-wrapper">
+                                <input type="text" id="searchKeyword" class="search-form__input" placeholder="Ingresa título, género o plataforma..." autocomplete="off" />
+                                <div class="search-autocomplete" id="searchAutocomplete" hidden></div>
+                            </div>
+                        </div>
+
+                        <!-- Categorías populares -->
+                        <div class="search-form__group search-form__group--categories">
+                            <label class="search-form__label">Categorías populares</label>
+                            <div class="categories-grid" id="categoriesGrid"></div>
+                        </div>
+
+                        <!-- Rango de fechas con inputs nativos -->
+                        <div class="search-form__group search-form__group--date-range">
+                            <label class="search-form__label">Rango de fecha de lanzamiento</label>
+                            <div class="date-range-wrapper">
+                                <div class="date-input-wrapper">
+                                    <label for="dateFrom" class="date-input-label">Desde</label>
+                                    <input type="date" id="dateFrom" class="date-input" />
+                                </div>
+                                <div class="date-input-wrapper">
+                                    <label for="dateTo" class="date-input-label">Hasta</label>
+                                    <input type="date" id="dateTo" class="date-input" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botón de búsqueda -->
+                        <div class="search-form__actions">
+                            <button type="submit" class="btn-search-submit">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8" />
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                </svg>
+                                Buscar
+                            </button>
+                            <button type="reset" class="btn-search-reset">Limpiar filtros</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Resultados de búsqueda manteniendo la estructura de la página principal -->
+                <div id="searchResults" class="search-results">
+                    <!-- Resultados de búsqueda -->
+                    <section class="section" id="resultsSection" hidden>
+                        <div class="section__header">
+                            <h2 class="section__title" id="searchResultsTitle">Resultados</h2>
+                            <span class="section__count" id="searchResultsCount"></span>
+                        </div>
+                        <div class="product-grid" id="searchResultsGrid"></div>
+                        <div class="pagination" id="searchPagination"></div>
+                    </section>
+
+                    <!-- Mensaje cuando no hay resultados -->
+                    <div class="search-no-results" id="searchNoResults" hidden>
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <h3>No se encontraron resultados</h3>
+                        <p>Intenta con otros términos de búsqueda o ajusta el rango de fechas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="favoritesView" class="search-view" style="display: none">
+            <div class="search-container">
+                <button class="search-view__back-btn" id="favoritesBackBtn" aria-label="Volver">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                </button>
+
+                <section class="search-block">
+                    <h2 class="search-block__title">Mis favoritos</h2>
+                    <p class="search-block__description">Aquí aparecen los productos que marcaste como favoritos. Puedes eliminarlos con un solo clic.</p>
+                </section>
+
+                <div class="search-results">
+                    <section class="section" id="favoritesSection">
+                        <div class="section__header">
+                            <h2 class="section__title">Favoritos</h2>
+                        </div>
+                    <input class="search-input" id="searchInput" type="text" placeholder="Buscar juegos, g&eacute;neros, plataformas..." autocomplete="off" />
+                        </svg>
+                        <h3>No tienes favoritos aún</h3>
+                <button class="btn-filter" id="filterBtn" type="button" title="Abrir filtros" aria-label="Abrir filtros">
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="registerModal" class="login-page" hidden>
@@ -181,6 +291,9 @@
         <script src="js/data.js"></script>
         <script src="js/favorites.js"></script>
         <script src="js/render.js"></script>
+        <script src="js/favorites-view.js"></script>
+        <script src="js/detail-availability.js"></script>
+        <script src="js/search-advanced.js"></script>
         <script src="js/router.js"></script>
         <script src="js/ui.js"></script>
         <script src="js/auth.js"></script>

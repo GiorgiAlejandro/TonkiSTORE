@@ -2,9 +2,11 @@ from sqlite3 import IntegrityError
 from flask import Blueprint, jsonify, request
 from auth import get_authenticated_user
 from model.games_db import GamesDB
+from model.reservations_db import ReservationsDB
 
 games_bp = Blueprint("games", __name__)
 db = GamesDB()
+reservations_db = ReservationsDB()
 
 
 @games_bp.route("/games", methods=["GET"])
@@ -53,6 +55,65 @@ def get_game(app_id: int):
     if game is None:
         return jsonify({"error": "game not found"}), 404
     return jsonify(game)
+
+
+@games_bp.route("/games/<int:app_id>/availability", methods=["GET"])
+def get_game_availability(app_id: int):
+    """
+    Obtiene la disponibilidad (fechas ocupadas) de un producto.
+    Incluye información del producto y lista de fechas reservadas.
+    """
+    try:
+        game = db.get_game_with_availability(app_id)
+        if game is None:
+            return jsonify({"error": "game not found"}), 404
+        return jsonify(game)
+    except Exception as e:
+        return jsonify({
+            "error": "No se puede obtener la información de disponibilidad en este momento",
+            "details": str(e)
+        }), 500
+
+
+@games_bp.route("/games/search/by-date", methods=["GET"])
+def search_games_by_date():
+    """
+    Busca productos disponibles en un rango de fechas.
+    Parámetros: start_date (YYYY-MM-DD), end_date (YYYY-MM-DD), q (búsqueda opcional)
+    """
+    start_date = request.args.get("start_date", "").strip()
+    end_date = request.args.get("end_date", "").strip()
+    query = request.args.get("q", "").strip()
+
+    if not start_date or not end_date:
+        return jsonify({
+            "error": "Missing parameters: start_date and end_date are required (YYYY-MM-DD format)"
+        }), 400
+
+    try:
+        # Valida formato de fechas
+        from datetime import datetime
+        datetime.strptime(start_date, "%Y-%m-%d")
+        datetime.strptime(end_date, "%Y-%m-%d")
+        
+        if start_date > end_date:
+            return jsonify({"error": "start_date must be before end_date"}), 400
+
+        # Obtiene productos disponibles en el rango
+        games = reservations_db.get_available_games(start_date, end_date)
+        
+        # Si hay búsqueda adicional, filtra por query
+        if query:
+            games = [g for g in games if query.lower() in g.get("name", "").lower()]
+
+        return jsonify(games)
+    except ValueError as e:
+        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
+    except Exception as e:
+        return jsonify({
+            "error": "Error searching games by date",
+            "details": str(e)
+        }), 500
 
 
 @games_bp.route("/games", methods=["POST"])

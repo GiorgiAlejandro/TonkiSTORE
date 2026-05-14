@@ -69,6 +69,27 @@ def create_tables(cursor: sqlite3.Cursor) -> None:
             icon        TEXT,
             created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        -- Tabla de reservas/disponibilidad (Sprint 3)
+        CREATE TABLE IF NOT EXISTS reservations (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            app_id      INTEGER NOT NULL REFERENCES games(app_id) ON DELETE CASCADE,
+            user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            start_date  DATE    NOT NULL,
+            end_date    DATE    NOT NULL,
+            status      TEXT    DEFAULT 'confirmed',
+            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(app_id, start_date, end_date)
+        );
+
+        -- Tabla de favoritos (Sprint 3)
+        CREATE TABLE IF NOT EXISTS favorites (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            app_id      INTEGER NOT NULL REFERENCES games(app_id) ON DELETE CASCADE,
+            created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, app_id)
+        );
     """)
 
 

@@ -202,6 +202,48 @@ function buildDetailHTML(product) {
             </div>
           </div>
 
+          <!-- Alquiler del producto -->
+          <div class="detail__rental" aria-labelledby="detail-rental-title">
+            <div class="detail__section-header detail__section-header--stacked">
+              <h3 class="detail__section-title" id="detail-rental-title">Alquilar producto</h3>
+              <p class="detail__section-note" id="rentalAuthNote">Iniciá sesión para alquilar este juego.</p>
+            </div>
+
+            <form id="rentalForm" class="rental-form">
+              <div class="rental-form__fields">
+                <label class="rental-form__field" for="rentalStartDate">
+                  <span>Fecha de inicio</span>
+                  <input class="date-input rental-form__input" id="rentalStartDate" type="date" />
+                </label>
+
+                <label class="rental-form__field" for="rentalEndDate">
+                  <span>Fecha de fin</span>
+                  <input class="date-input rental-form__input" id="rentalEndDate" type="date" />
+                </label>
+              </div>
+
+              <div class="rental-summary" aria-live="polite">
+                <div class="rental-summary__item">
+                  <span class="rental-summary__label">Precio por día</span>
+                  <span class="rental-summary__value" id="rentalDailyPrice">—</span>
+                </div>
+                <div class="rental-summary__item">
+                  <span class="rental-summary__label">Días</span>
+                  <span class="rental-summary__value" id="rentalDays">—</span>
+                </div>
+                <div class="rental-summary__item">
+                  <span class="rental-summary__label">Total</span>
+                  <span class="rental-summary__value rental-summary__value--accent" id="rentalTotalPrice">—</span>
+                </div>
+              </div>
+
+              <p id="rentalLongStayWarning" class="rental-warning" hidden>Si lo alquilás por más de 30 días, conviene comprarlo.</p>
+              <p id="rentalFeedback" class="rental-feedback" hidden></p>
+
+              <button class="btn-primary rental-form__submit" id="rentalSubmitBtn" type="submit">Alquilar ahora</button>
+            </form>
+          </div>
+
           
         </section>
 

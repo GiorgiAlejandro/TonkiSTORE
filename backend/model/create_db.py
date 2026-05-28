@@ -90,6 +90,17 @@ def create_tables(cursor: sqlite3.Cursor) -> None:
             created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(user_id, app_id)
         );
+
+        -- Tabla de compras permanentes
+        CREATE TABLE IF NOT EXISTS purchases (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            app_id          INTEGER NOT NULL REFERENCES games(app_id) ON DELETE CASCADE,
+            user_id         INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            purchase_price  REAL    NOT NULL,
+            status          TEXT    DEFAULT 'completed',
+            created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, app_id)
+        );
     """)
 
 

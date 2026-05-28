@@ -43,6 +43,37 @@ const UI = (() => {
         return copy;
     }
 
+    async function _searchCurrentView(query, force = false) {
+        const normalizedQuery = String(query || "");
+        const currentView = window.Router?.getCurrentView?.() || "home";
+        const hasQuery = Boolean(normalizedQuery.trim());
+
+        if (currentView === "home" || currentView === "detail" || currentView === "cart" || currentView === "preview") {
+            window.Recommendations?.setSearchQuery?.(normalizedQuery);
+        }
+
+        if (currentView === "favorites") {
+            window.FavoritesView?.search?.(normalizedQuery);
+            return;
+        }
+
+        if (currentView === "library") {
+            window.LibraryView?.search?.(normalizedQuery);
+            return;
+        }
+
+        if (!force && !hasQuery) {
+            return;
+        }
+
+        try {
+            const filtered = await searchGames(normalizedQuery);
+            renderGrid(filtered, false);
+        } catch {
+            _showGridError("No se pudo cargar la busqueda desde el servidor.");
+        }
+    }
+
     function _canUseFavorites() {
         return Boolean(window.Favorites?.canUseFavorites?.());
     }
@@ -61,9 +92,7 @@ const UI = (() => {
 
     function _currentEmptyMessage() {
         if (_favoritesOnly) {
-            return _searchInput?.value?.trim()
-                ? "No tienes favoritos que coincidan con esa busqueda."
-                : "Todavia no agregaste juegos a tus favoritos.";
+            return _searchInput?.value?.trim() ? "No tienes favoritos que coincidan con esa busqueda." : "Todavia no agregaste juegos a tus favoritos.";
         }
 
         return "No se encontraron juegos con ese criterio.";
@@ -86,16 +115,14 @@ const UI = (() => {
             _favoritesOnly = false;
             _favoritesBtn.classList.remove("btn-filter--active");
             _favoritesBtn.setAttribute("aria-pressed", "false");
-            _favoritesBtn.textContent = "Mis favoritos";
             _favoritesBtn.title = "";
             _syncHeading();
             return;
         }
 
-        _favoritesBtn.textContent = count > 0 ? `Mis favoritos (${count})` : "Mis favoritos";
         _favoritesBtn.classList.toggle("btn-filter--active", _favoritesOnly);
         _favoritesBtn.setAttribute("aria-pressed", _favoritesOnly ? "true" : "false");
-        _favoritesBtn.title = _favoritesOnly ? "Mostrar todo el catalogo" : "Ver solo tus juegos favoritos";
+        _favoritesBtn.title = _favoritesOnly ? "Mostrar todo el catalogo" : "Favoritos";
         _syncHeading();
     }
 
@@ -116,7 +143,17 @@ const UI = (() => {
     }
 
     function _setList(list, shuffle = false) {
-        _sourceList = shuffle ? _shuffle(list) : [...list];
+        let processed = shuffle ? _shuffle(list) : [...list];
+        const query = String(_searchInput?.value || "").trim();
+        // If there's no manual search query, hide games already owned by the user
+        if (!query) {
+            try {
+                processed = processed.filter((product) => !Boolean(window.LibraryView?.isOwned?.(product?.id)));
+            } catch (err) {
+                // ignore; if check fails, keep full list
+            }
+        }
+        _sourceList = processed;
         _currentPage = 1;
         _refreshRenderedList();
     }
@@ -252,9 +289,8 @@ const UI = (() => {
                 const token = ++_searchToken;
 
                 try {
-                    const filtered = await searchGames(value);
+                    await _searchCurrentView(value, true);
                     if (token !== _searchToken) return;
-                    renderGrid(filtered, false);
                 } catch {
                     if (token !== _searchToken) return;
                     _showGridError("No se pudo cargar la busqueda desde el servidor.");
@@ -265,9 +301,14 @@ const UI = (() => {
         _favoritesBtn?.addEventListener("click", () => {
             if (!_canUseFavorites()) return;
 
-            _favoritesOnly = !_favoritesOnly;
-            _currentPage = 1;
-            _refreshRenderedList();
+            // If favorites view is already visible, close it (toggle behavior)
+            const favView = document.getElementById("favoritesView");
+            const favVisible = favView && window.getComputedStyle(favView).display !== "none";
+            if (favVisible) {
+                window.Router?.closeFavoritesView?.();
+            } else {
+                window.Router?.openFavoritesView?.();
+            }
         });
 
         window.addEventListener("auth:changed", () => {
@@ -281,6 +322,10 @@ const UI = (() => {
         _syncFavoritesButton();
     }
 
+    function refreshSearch(query = _searchInput?.value || "") {
+        return _searchCurrentView(query, false);
+    }
+
     async function loadInitialProducts() {
         try {
             const list = await fetchGames();
@@ -292,5 +337,7 @@ const UI = (() => {
         }
     }
 
-    return { init, renderGrid, loadInitialProducts };
+    return { init, renderGrid, loadInitialProducts, refreshSearch };
 })();
+
+window.UI = UI;

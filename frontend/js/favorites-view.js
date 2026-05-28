@@ -8,10 +8,23 @@ const FavoritesView = (() => {
     let _pagination = null;
     let _noResults = null;
     let _currentPage = 1;
+    let _currentQuery = "";
+
+    function _matchesQuery(product, query) {
+        const normalized = String(query || "")
+            .trim()
+            .toLowerCase();
+        if (!normalized) return true;
+
+        const haystack = [product?.title, product?.releaseDate, ...(Array.isArray(product?.tags) ? product.tags : [])].filter(Boolean).join(" ").toLowerCase();
+
+        return haystack.includes(normalized);
+    }
 
     function _getFavoriteProducts() {
         const ids = window.Favorites?.getIds?.() || [];
-        const byId = (products || []).reduce((acc, p) => {
+        const sourceProducts = window.getCatalogProducts?.() || products || [];
+        const byId = sourceProducts.reduce((acc, p) => {
             acc[p.id] = p;
             return acc;
         }, {});
@@ -21,7 +34,7 @@ const FavoritesView = (() => {
     function _render() {
         if (!_grid || !_pagination || !_noResults) return;
 
-        const list = _getFavoriteProducts();
+        const list = _getFavoriteProducts().filter((product) => _matchesQuery(product, _currentQuery));
         if (list.length === 0) {
             _grid.innerHTML = "";
             _pagination.innerHTML = "";
@@ -77,6 +90,12 @@ const FavoritesView = (() => {
         }
     }
 
+    function search(query) {
+        _currentQuery = String(query || "").trim();
+        _currentPage = 1;
+        _render();
+    }
+
     function init() {
         _grid = document.getElementById("favoritesGrid");
         _pagination = document.getElementById("favoritesPagination");
@@ -96,23 +115,24 @@ const FavoritesView = (() => {
     }
 
     function open() {
+        _currentPage = 1;
+
         // Ensure products are loaded
-        if (!products || products.length === 0) {
+        const sourceProducts = window.getCatalogProducts?.() || products || [];
+        if (!sourceProducts || sourceProducts.length === 0) {
             fetchGames()
                 .then(() => {
-                    _currentPage = 1;
                     _render();
                 })
                 .catch(() => {
                     _grid.innerHTML = '<div class="no-results"><p>No se pudo cargar productos.</p></div>';
                 });
         } else {
-            _currentPage = 1;
             _render();
         }
     }
 
-    return { init, open };
+    return { init, open, search };
 })();
 
 window.FavoritesView = FavoritesView;

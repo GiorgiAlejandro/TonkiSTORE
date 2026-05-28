@@ -11,6 +11,7 @@ const AdvancedSearch = (() => {
     let _form = null;
     let _keywordInput = null;
     let _autocompleteDropdown = null;
+    let _offersOnlyInput = null;
     let _dateFromInput = null;
     let _dateToInput = null;
     let _searchResults = null;
@@ -302,12 +303,18 @@ const AdvancedSearch = (() => {
     }
 
     function _performSearch(keyword = "", startDate = null, endDate = null) {
+        const normalizedKeyword = String(keyword || "")
+            .trim()
+            .toLowerCase();
+        const offersOnly = Boolean(_offersOnlyInput?.checked);
+
         const results = (products || []).filter((product) => {
             // Filter by keyword
-            if (keyword && keyword.length > 0) {
-                const lowerKeyword = keyword.toLowerCase();
-                const matchesTitle = product.title && product.title.toLowerCase().includes(lowerKeyword);
-                const matchesTags = product.tags && product.tags.some((tag) => tag.toLowerCase().includes(lowerKeyword));
+            if (offersOnly) {
+                if (Number(product.discount || 0) <= 0) return false;
+            } else if (normalizedKeyword.length > 0) {
+                const matchesTitle = product.title && product.title.toLowerCase().includes(normalizedKeyword);
+                const matchesTags = product.tags && product.tags.some((tag) => tag.toLowerCase().includes(normalizedKeyword));
 
                 if (!matchesTitle && !matchesTags) return false;
             }
@@ -336,6 +343,24 @@ const AdvancedSearch = (() => {
         });
 
         return results;
+    }
+
+    function _runCurrentSearch() {
+        const keyword = _keywordInput?.value.trim() || "";
+        const startDate = _dateFromInput?.value ? _parseDateString(_dateFromInput.value) : null;
+        const endDate = _dateToInput?.value ? _parseDateString(_dateToInput.value) : null;
+
+        const results = _performSearch(keyword, startDate, endDate);
+        _renderSearchResults(results);
+        return results;
+    }
+
+    function searchOffersOnly() {
+        if (_offersOnlyInput) {
+            _offersOnlyInput.checked = true;
+        }
+
+        return _runCurrentSearch();
     }
 
     function _createProductCard(product, index) {
@@ -499,6 +524,7 @@ const AdvancedSearch = (() => {
         _form = document.getElementById("advancedSearchForm");
         _keywordInput = document.getElementById("searchKeyword");
         _autocompleteDropdown = document.getElementById("searchAutocomplete");
+        _offersOnlyInput = document.getElementById("searchOffersOnly");
         _dateFromInput = document.getElementById("dateFrom");
         _dateToInput = document.getElementById("dateTo");
         _searchResults = document.getElementById("searchResults");
@@ -554,12 +580,7 @@ const AdvancedSearch = (() => {
         // Form submit
         _form.addEventListener("submit", (e) => {
             e.preventDefault();
-            const keyword = _keywordInput.value.trim();
-            const startDate = _dateFromInput?.value ? _parseDateString(_dateFromInput.value) : null;
-            const endDate = _dateToInput?.value ? _parseDateString(_dateToInput.value) : null;
-
-            const results = _performSearch(keyword, startDate, endDate);
-            _renderSearchResults(results);
+            _runCurrentSearch();
         });
 
         // Form reset
@@ -567,6 +588,7 @@ const AdvancedSearch = (() => {
             setTimeout(() => {
                 _keywordInput.value = "";
                 _autocompleteDropdown.hidden = true;
+                if (_offersOnlyInput) _offersOnlyInput.checked = false;
                 if (_dateFromInput) _dateFromInput.value = _toISO(twoYearsAgo);
                 if (_dateToInput) _dateToInput.value = _toISO(today);
                 document.getElementById("searchNoResults").hidden = true;
@@ -593,8 +615,11 @@ const AdvancedSearch = (() => {
 
     return {
         init,
+        searchOffersOnly,
     };
 })();
+
+window.AdvancedSearch = AdvancedSearch;
 
 // Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {

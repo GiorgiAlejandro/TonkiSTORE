@@ -13,48 +13,71 @@
     <body data-page="store">
         <header class="header">
             <div class="header__inner">
-                <div class="logo">
-                    <div class="logo__icon"></div>
-                    <span class="logo__text">TONKI<span>STORE</span></span>
-                </div>
-
-                <div class="search-wrapper">
-                    <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8" />
-                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                    </svg>
-                    <input class="search-input" id="searchInput" type="text" placeholder="Buscar juegos, g&eacute;neros, plataformas..." autocomplete="off" />
-                </div>
-
-                <button class="btn-filter" id="filterBtn" type="button" title="Abrir filtros" aria-label="Abrir filtros">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="4" y1="6" x2="16" y2="6" />
-                        <line x1="8" y1="12" x2="20" y2="12" />
-                        <line x1="4" y1="18" x2="12" y2="18" />
-                    </svg>
-                    Filtros
-                </button>
-
-                <button class="btn-filter" id="favoritesBtn" type="button" hidden aria-pressed="false">Mis favoritos</button>
-
-                <nav class="header__nav">
-                    <a href="admin.html" class="btn-admin" id="adminLink" hidden>Panel de admin</a>
-                    <button class="btn-auth btn-auth--outline" id="openRegisterBtn" type="button">Crear cuenta</button>
-                    <button class="btn-auth btn-auth--filled" id="openLoginBtn" type="button">Iniciar sesi&oacute;n</button>
-
-                    <div class="auth-user auth-user--hidden" id="authUserMenu" hidden>
-                        <button class="auth-user__trigger" id="avatarBtn" type="button" aria-label="Abrir men&uacute; de usuario" aria-haspopup="true" aria-expanded="false">
-                            <span class="auth-user__avatar" id="avatarInitials">TS</span>
-                            <span class="auth-user__name" id="avatarName">Usuario</span>
-                        </button>
-
-                        <div class="auth-user__menu" id="avatarMenu" hidden>
-                            <p class="auth-user__menu-name" id="authMenuName">Usuario</p>
-                            <p class="auth-user__menu-email" id="authMenuEmail">usuario@correo.com</p>
-                            <button class="auth-user__logout" id="logoutBtn" type="button">Cerrar sesi&oacute;n</button>
-                        </div>
+                <div class="header__top">
+                    <div class="logo">
+                        <div class="logo__icon"></div>
+                        <span class="logo__text">TONKI<span>STORE</span></span>
                     </div>
-                </nav>
+
+                    <nav class="header__nav">
+                        <a href="admin.html" class="btn-admin" id="adminLink" hidden>Panel de admin</a>
+                        <button class="btn-auth btn-auth--outline" id="openRegisterBtn" type="button">Crear cuenta</button>
+                        <button class="btn-auth btn-auth--filled" id="openLoginBtn" type="button">Iniciar sesi&oacute;n</button>
+
+                        <div class="auth-user auth-user--hidden" id="authUserMenu" hidden>
+                            <button class="auth-user__trigger" id="avatarBtn" type="button" aria-label="Abrir men&uacute; de usuario" aria-haspopup="true" aria-expanded="false">
+                                <span class="auth-user__avatar" id="avatarInitials">TS</span>
+                                <span class="auth-user__name" id="avatarName">Usuario</span>
+                            </button>
+
+                            <div class="auth-user__menu" id="avatarMenu" hidden>
+                                <p class="auth-user__menu-name" id="authMenuName">Usuario</p>
+                                <p class="auth-user__menu-email" id="authMenuEmail">usuario@correo.com</p>
+                                <button class="auth-user__logout" id="logoutBtn" type="button">Cerrar sesi&oacute;n</button>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+
+                <div class="header__searchbar">
+                    <button class="btn-filter btn-filter--icon" id="filterBtn" type="button" title="Abrir filtros" aria-label="Abrir filtros">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="4" y1="6" x2="16" y2="6" />
+                            <line x1="8" y1="12" x2="20" y2="12" />
+                            <line x1="4" y1="18" x2="12" y2="18" />
+                        </svg>
+                        <span class="sr-only">Filtros</span>
+                    </button>
+
+                    <div class="search-wrapper">
+                        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input class="search-input" id="searchInput" type="text" placeholder="Buscar juegos, g&eacute;neros, plataformas..." autocomplete="off" />
+                    </div>
+
+                    <div class="header__quick-actions" aria-label="Accesos rápidos">
+                        <button class="btn-filter btn-filter--icon" id="cartBtn" type="button" hidden aria-pressed="false" title="Carrito" aria-label="Carrito">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M7 4h-2l-1 2H2v2h1l3.6 7.59-1.35 2.45A1 1 0 0 0 6 19h12v-2H7.42a.25.25 0 0 1-.23-.15L7.1 16h9.45a1 1 0 0 0 .96-.74l1.54-6.17A1 1 0 0 0 18.1 8H6.21l-.94-2z" />
+                                <circle cx="10" cy="21" r="1" />
+                                <circle cx="18" cy="21" r="1" />
+                            </svg>
+                        </button>
+                        <button class="btn-filter btn-filter--icon" id="favoritesBtn" type="button" hidden aria-pressed="false" title="Favoritos" aria-label="Favoritos">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 21s-6.5-4.35-9-8.5C1.2 9 3 6 6.5 6c2 0 3.5 1.1 4.5 2.5C12 7.1 13.5 6 15.5 6 19 6 20.8 9 21 12.5 18.5 16.65 12 21 12 21z" />
+                            </svg>
+                        </button>
+                        <button class="btn-filter btn-filter--icon" id="libraryBtn" type="button" hidden aria-pressed="false" title="Biblioteca" aria-label="Biblioteca">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                                <path d="M6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5v-13A2.5 2.5 0 0 1 6.5 3z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -62,13 +85,12 @@
             <section class="hero">
                 <div class="hero__inner">
                     <div>
-                        <p class="hero__label">// Colecci&oacute;n 2026</p>
                         <h1 class="hero__title">
                             Los mejores juegos
                             <span>del a&ntilde;o, ac&aacute;.</span>
                         </h1>
                         <p class="hero__sub">Descuentos exclusivos en los t&iacute;tulos m&aacute;s esperados. Entrega digital inmediata.</p>
-                        <a class="hero__cta" href="#productGrid">
+                        <a class="hero__cta" href="#" id="heroOffersBtn">
                             Ver ofertas
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12" />
@@ -81,6 +103,18 @@
                         <span class="hero__badge-label">Juegos en oferta</span>
                     </div>
                 </div>
+            </section>
+
+            <section class="section recommendations-section" id="recommendationsSection" hidden>
+                <div class="section__header">
+                    <div>
+                        <h2 class="section__title">Recomendados para vos</h2>
+                        <p class="recommendations-section__description">Sugeridos a partir de tus juegos favoritos y sus etiquetas.</p>
+                    </div>
+                </div>
+                <div class="recommendations-grid" id="recommendationsGrid"></div>
+                <div class="pagination" id="recommendationsPagination"></div>
+                <div class="recommendations-empty" id="recommendationsEmpty" hidden></div>
             </section>
 
             <main class="section">
@@ -109,6 +143,25 @@
             <div class="detail-page-body" id="detailContent"></div>
         </div>
 
+        <div id="previewView" class="preview-view" style="display: none">
+            <div class="preview-container">
+                <button class="preview-view__back-btn" id="previewBackBtn" aria-label="Volver al detalle">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                </button>
+
+                <div id="previewContent"></div>
+            </div>
+        </div>
+
+        <div id="confirmationView" class="preview-view" style="display: none">
+            <div class="preview-container">
+                <div id="confirmationContent"></div>
+            </div>
+        </div>
+
         <div id="searchView" class="search-view" style="display: none">
             <div class="search-container">
                 <button class="search-view__back-btn" id="searchBackBtn" aria-label="Volver">
@@ -126,9 +179,17 @@
                         <!-- Búsqueda de palabras clave -->
                         <div class="search-form__group">
                             <label for="searchKeyword" class="search-form__label">Palabras clave</label>
-                            <div class="search-input-wrapper">
-                                <input type="text" id="searchKeyword" class="search-form__input" placeholder="Ingresa título, género o plataforma..." autocomplete="off" />
-                                <div class="search-autocomplete" id="searchAutocomplete" hidden></div>
+                            <div class="search-form__keyword-row">
+                                <div class="search-input-wrapper search-form__keyword-field">
+                                    <input type="text" id="searchKeyword" class="search-form__input" placeholder="Ingresa título, género o plataforma..." autocomplete="off" />
+                                    <div class="search-autocomplete" id="searchAutocomplete" hidden></div>
+                                </div>
+
+                                <label class="search-form__checkbox search-form__checkbox--inline">
+                                    <input type="checkbox" id="searchOffersOnly" class="search-form__checkbox-input" />
+                                    <span class="search-form__checkbox-box" aria-hidden="true"></span>
+                                    <span class="search-form__checkbox-text">En oferta</span>
+                                </label>
                             </div>
                         </div>
 
@@ -203,7 +264,6 @@
 
                 <section class="search-block">
                     <h2 class="search-block__title">Mis favoritos</h2>
-                    <p class="search-block__description">Aquí aparecen los productos que marcaste como favoritos. Puedes eliminarlos con un solo clic.</p>
                 </section>
 
                 <div class="search-results">
@@ -211,12 +271,72 @@
                         <div class="section__header">
                             <h2 class="section__title">Favoritos</h2>
                         </div>
-                    <input class="search-input" id="searchInput" type="text" placeholder="Buscar juegos, g&eacute;neros, plataformas..." autocomplete="off" />
-                        </svg>
-                        <h3>No tienes favoritos aún</h3>
-                <button class="btn-filter" id="filterBtn" type="button" title="Abrir filtros" aria-label="Abrir filtros">
-                    </div>
+
+                        <div class="product-grid" id="favoritesGrid"></div>
+                        <div class="pagination" id="favoritesPagination"></div>
+                        <div class="no-results" id="favoritesNoResults" hidden>
+                            <h3>No tienes favoritos aún</h3>
+                            <p>Agrega juegos a favoritos desde el catálogo para verlos aquí.</p>
+                        </div>
+                    </section>
                 </div>
+            </div>
+        </div>
+
+        <div id="libraryView" class="search-view" style="display: none">
+            <div class="search-container">
+                <button class="search-view__back-btn" id="libraryBackBtn" aria-label="Volver">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                </button>
+
+                <section class="search-block">
+                    <h2 class="search-block__title">Mi biblioteca</h2>
+                    <p class="search-block__description">Acá ves claramente tus juegos comprados y los que tienes alquilados actualmente.</p>
+                </section>
+
+                <div id="libraryStatus" class="library-status" hidden></div>
+
+                <div class="library-layout">
+                    <section class="section" id="libraryPurchasesSection">
+                        <div class="section__header">
+                            <h2 class="section__title">Comprados</h2>
+                            <span class="section__count" id="libraryPurchasesCount"></span>
+                        </div>
+                        <div class="library-grid" id="libraryPurchasesGrid"></div>
+                        <div class="no-results" id="libraryPurchasesEmpty" hidden>
+                            <h3>No tienes compras todavía</h3>
+                            <p>Cuando compres juegos, aparecerán aquí.</p>
+                        </div>
+                    </section>
+
+                    <section class="section" id="libraryRentalsSection">
+                        <div class="section__header">
+                            <h2 class="section__title">Alquilados</h2>
+                            <span class="section__count" id="libraryRentalsCount"></span>
+                        </div>
+                        <div class="library-grid" id="libraryRentalsGrid"></div>
+                        <div class="no-results" id="libraryRentalsEmpty" hidden>
+                            <h3>No tienes alquileres activos</h3>
+                            <p>Cuando alquiles un juego, aparecerá aquí hasta su vencimiento.</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <div id="cartView" class="preview-view" style="display: none">
+            <div class="preview-container">
+                <button class="preview-view__back-btn" id="cartBackBtn" aria-label="Volver al catálogo">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                </button>
+
+                <div id="cartContent"></div>
             </div>
         </div>
 
@@ -290,8 +410,11 @@
 
         <script src="js/data.js"></script>
         <script src="js/favorites.js"></script>
+        <script src="js/cart.js"></script>
         <script src="js/render.js"></script>
+        <script src="js/recommendations.js"></script>
         <script src="js/favorites-view.js"></script>
+        <script src="js/library-view.js"></script>
         <script src="js/detail-availability.js"></script>
         <script src="js/search-advanced.js"></script>
         <script src="js/router.js"></script>

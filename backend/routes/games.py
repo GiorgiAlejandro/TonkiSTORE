@@ -1,4 +1,5 @@
 from sqlite3 import IntegrityError
+import sqlite3
 from flask import Blueprint, jsonify, request
 from auth import get_authenticated_user
 from model.games_db import GamesDB
@@ -7,6 +8,60 @@ from model.reservations_db import ReservationsDB
 games_bp = Blueprint("games", __name__)
 db = GamesDB()
 reservations_db = ReservationsDB()
+
+
+def _get_popular_games(limit: int = 6) -> list[dict]:
+    limit = max(1, int(limit))
+
+    with sqlite3.connect(db.db_path) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            WITH purchase_counts AS (
+                SELECT app_id, COUNT(*) AS purchase_count
+                FROM purchases
+                WHERE status = 'completed'
+                GROUP BY app_id
+            ),
+            reservation_counts AS (
+                SELECT app_id, COUNT(*) AS reservation_count
+                FROM reservations
+                WHERE status = 'confirmed'
+                GROUP BY app_id
+            )
+            SELECT g.app_id,
+                   g.name,
+                   g.release_date,
+                   g.genre_id,
+                   g.price_usd,
+                   g.discount_pct,
+                   g.genre,
+                   COALESCE(pc.purchase_count, 0) AS purchase_count,
+                   COALESCE(rc.reservation_count, 0) AS reservation_count,
+                   COALESCE(pc.purchase_count, 0) + COALESCE(rc.reservation_count, 0) AS popularity_score
+            FROM games g
+            LEFT JOIN purchase_counts pc ON pc.app_id = g.app_id
+            LEFT JOIN reservation_counts rc ON rc.app_id = g.app_id
+            WHERE COALESCE(pc.purchase_count, 0) + COALESCE(rc.reservation_count, 0) > 0
+            ORDER BY popularity_score DESC, g.name COLLATE NOCASE ASC
+            LIMIT ?
+            """,
+            (limit,),
+        )
+        rows = cursor.fetchall()
+
+    popular_games: list[dict] = []
+    for row in rows:
+        game = db.get_game(int(row["app_id"]))
+        if not game:
+            continue
+        game["purchase_count"] = int(row["purchase_count"] or 0)
+        game["reservation_count"] = int(row["reservation_count"] or 0)
+        game["popularity_score"] = int(row["popularity_score"] or 0)
+        popular_games.append(game)
+
+    return popular_games
 
 
 @games_bp.route("/games", methods=["GET"])
@@ -114,6 +169,18 @@ def search_games_by_date():
             "error": "Error searching games by date",
             "details": str(e)
         }), 500
+
+
+@games_bp.route("/games/popular", methods=["GET"])
+def get_popular_games():
+    limit = request.args.get("limit", "6").strip()
+    try:
+        popular = _get_popular_games(int(limit))
+        return jsonify(popular)
+    except ValueError:
+        return jsonify({"error": "limit must be an integer"}), 400
+    except Exception as e:
+        return jsonify({"error": "Error retrieving popular games", "details": str(e)}), 500
 
 
 @games_bp.route("/games", methods=["POST"])

@@ -25,3 +25,16 @@ Estas implementaciones permiten casos de uso como:
 - Reservar un juego por un período limitado, con validación de solapamientos.
 
 Para más detalles técnicos y ejemplos de uso, ver `backend/API_ENDPOINTS_SPRINT3.md` y `backend/SPRINT_3_CHANGES.md`.
+
+## Nuevas implementaciones (Sprint 4)
+
+Durante Sprint 4 se cerró el flujo de compra/alquiler y se ajustó la experiencia pública para que sea más clara y utilizable:
+
+- Carrito unificado: permite procesar compras y alquileres juntos desde una sola confirmación.
+- Confirmación de checkout: muestra el total final y el detalle de juegos comprados y alquilados.
+- Biblioteca del usuario: agrupa compras y alquileres activos en una vista dedicada.
+- Catálogo y recomendaciones: los juegos ya poseídos se marcan visualmente y se ocultan del listado normal salvo búsqueda manual.
+- Búsqueda avanzada: se incorporó el filtro "En oferta" como checkbox y el acceso directo desde la portada.
+- Interfaz principal: se simplificaron los accesos rápidos y se eliminó información de depuración innecesaria.
+
+Para más detalles técnicos y ejemplos de uso, ver `backend/API_ENDPOINTS_SPRINT4.md` y `backend/SPRINT_4_CHANGES.md`.

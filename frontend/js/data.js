@@ -8,6 +8,8 @@ const PRODUCT_OVERRIDES_STORAGE_KEY = "tonkistore.productOverrides";
 
 /** @type {Product[]} */
 let products = [];
+/** @type {Product[]} */
+let catalogProducts = [];
 
 function mapGameFeature(feature) {
     if (!feature || typeof feature !== "object") return null;
@@ -90,7 +92,8 @@ function saveProductOverrides(appId, override) {
 }
 
 function mapGameToProduct(game) {
-    const price = Number(game.price_usd ?? 0);
+    // Accept either 'price_usd' or legacy 'price' fields and coerce to number
+    const price = Number(game.price_usd ?? game.price ?? 0) || 0;
     const discount = Number(game.discount_pct ?? 0);
     const rawGenre = game.genre;
     const genre = rawGenre && typeof rawGenre === "object" ? rawGenre.name || "" : game.genre || "";
@@ -135,6 +138,7 @@ async function _fetchJson(url, options = {}) {
 async function fetchGames() {
     const games = await _fetchJson(`${API_BASE_URL}/games`);
     products = games.map(mapGameToProduct);
+    catalogProducts = [...products];
     // Notify listeners that product list updated
     try {
         window.dispatchEvent(new CustomEvent("products:updated", { detail: { count: products.length } }));
@@ -186,9 +190,14 @@ function formatPrice(amount) {
     return `$${Number(amount).toFixed(2)}`;
 }
 
+function getCatalogProducts() {
+    return [...catalogProducts];
+}
+
 window.fetchGames = fetchGames;
 window.searchGames = searchGames;
 window.getProductById = getProductById;
 window.createGame = createGame;
 window.saveProductOverrides = saveProductOverrides;
+window.getCatalogProducts = getCatalogProducts;
 window.getFallbackImage = () => FALLBACK_IMAGE;

@@ -36,6 +36,7 @@ def create_app() -> Flask:
         """Sirve admin.html en /admin"""
         return send_file(str(frontend_dir / "admin.html"), mimetype="text/html")
     
+    
     @app.route("/<path:filename>")
     def serve_static(filename):
         """Sirve archivos estáticos (CSS, JS, HTML, etc.)"""

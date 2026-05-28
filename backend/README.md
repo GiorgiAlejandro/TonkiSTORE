@@ -1,6 +1,6 @@
 # Backend
 
-Backend Flask de TonkiSTORE con autenticación, administración, catálogo de productos y las nuevas funciones implementadas en Sprint 3: **Favoritos**, **Reservas** y **Búsqueda por fecha**.
+Backend Flask de TonkiSTORE con autenticación, administración, catálogo de productos y las funciones implementadas en Sprint 3 y Sprint 4.
 
 ## Arranque rápido
 
@@ -20,6 +20,14 @@ Servidor local: `http://localhost:5000`
 - Búsqueda por rango de fechas: encontrar juegos disponibles entre dos fechas.
 - Endpoints de disponibilidad por juego para consultar intervalos ocupados.
 
+## Qué se agregó en Sprint 4
+
+- Checkout unificado de carrito con compras y alquileres.
+- Pantalla de confirmación con detalle de items comprados y alquilados.
+- Biblioteca del usuario con compras y alquileres activos.
+- Endpoints de compra, alquiler y biblioteca para completar el flujo.
+- Filtro visual de ofertas en la búsqueda avanzada y ajustes de catálogo/recomendaciones.
+
 ## Endpoints principales (resumen)
 
 - Autenticación: `POST /api/users/login`, `POST /api/users/register`, `GET /api/users/me`.
@@ -27,7 +35,7 @@ Servidor local: `http://localhost:5000`
 - Favoritos: `GET /api/favorites`, `POST /api/favorites/<app_id>`, `DELETE /api/favorites/<app_id>`.
 - Reservas: `POST /api/reservations`, `GET /api/reservations`, `DELETE /api/reservations/<id>`.
 
-Ver `API_ENDPOINTS_SPRINT3.md` y `SPRINT_3_CHANGES.md` para ejemplos y detalles.
+Ver `API_ENDPOINTS_SPRINT3.md`, `SPRINT_3_CHANGES.md`, `API_ENDPOINTS_SPRINT4.md` y `SPRINT_4_CHANGES.md` para ejemplos y detalles.
 
 ## Base de datos
 
